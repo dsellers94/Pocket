@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
 #include "PocketPlayer.generated.h"
 
 class UCameraComponent;
@@ -23,7 +25,11 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UPROPERTY(EditAnywhere)
+	float RotationRate = 100.f;
+
+	UFUNCTION()
+	void Rotate(float InputValue);
 
 private:
 

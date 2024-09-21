@@ -3,6 +3,8 @@
 
 #include "PocketPlayer.h"
 #include "Camera/CameraComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "GameFramework/SpringArmComponent.h"
 
 APocketPlayer::APocketPlayer()
@@ -10,7 +12,7 @@ APocketPlayer::APocketPlayer()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(RootComponent);
+	SetRootComponent(SpringArm);
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
@@ -28,9 +30,11 @@ void APocketPlayer::Tick(float DeltaTime)
 
 }
 
-void APocketPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void APocketPlayer::Rotate(float InputValue)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	FRotator Rotation = GetActorRotation();
+	FRotator NewRotation = FRotator(Rotation.Pitch, Rotation.Yaw + InputValue * RotationRate * GetWorld()->GetDeltaSeconds(), Rotation.Roll);
+	SetActorRotation(NewRotation);
 }
+
 
