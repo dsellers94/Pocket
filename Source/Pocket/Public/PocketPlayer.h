@@ -28,15 +28,36 @@ public:
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 100.f;
 
+	UPROPERTY(EditAnywhere)
+	float MinArmLength = 200.f;
+
+	UPROPERTY(EditAnywhere)
+	float MaxArmLength = 6000.f;
+
+	UPROPERTY(EditAnywhere)
+	float ZoomRate = 100.f;
+
+	UPROPERTY(EditAnywhere)
+	float MoveUpRate = 100.f;
+
 	UFUNCTION()
 	void Rotate(float InputValue);
 
+	UFUNCTION()
+	void Zoom(float InputValue);
+
+	UFUNCTION()
+	void MoveUp(float InputValue);
+
 private:
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USceneComponent> DefaultRoot;
 
 };

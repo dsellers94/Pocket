@@ -11,8 +11,12 @@ APocketPlayer::APocketPlayer()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	DefaultRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	SetRootComponent(DefaultRoot);
+
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SetRootComponent(SpringArm);
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->bDoCollisionTest = false;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
@@ -35,6 +39,21 @@ void APocketPlayer::Rotate(float InputValue)
 	FRotator Rotation = GetActorRotation();
 	FRotator NewRotation = FRotator(Rotation.Pitch, Rotation.Yaw + InputValue * RotationRate * GetWorld()->GetDeltaSeconds(), Rotation.Roll);
 	SetActorRotation(NewRotation);
+}
+
+void APocketPlayer::Zoom(float InputValue)
+{
+	if (SpringArm)
+	{
+		SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength + InputValue * ZoomRate, MinArmLength, MaxArmLength);
+	}
+}
+
+void APocketPlayer::MoveUp(float InputValue)
+{
+	FVector Location = GetActorLocation();
+	FVector NewLocation = FVector(Location.X, Location.Y, Location.Z + InputValue * MoveUpRate);
+	SetActorLocation(NewLocation);
 }
 
 
