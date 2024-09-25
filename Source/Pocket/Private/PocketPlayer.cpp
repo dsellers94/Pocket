@@ -38,7 +38,7 @@ void APocketPlayer::Rotate(float InputValue)
 	FRotator Rotation = GetActorRotation();
 	FRotator NewRotation = FRotator(Rotation.Pitch, Rotation.Yaw + InputValue * RotationRate * GetWorld()->GetDeltaSeconds(), Rotation.Roll);
 	SetActorRotation(NewRotation);
-	Rotated.Broadcast();
+	ViewChanged.Broadcast();
 }
 
 void APocketPlayer::Zoom(float InputValue)
@@ -47,6 +47,7 @@ void APocketPlayer::Zoom(float InputValue)
 	{
 		SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength + InputValue * ZoomRate, MinArmLength, MaxArmLength);
 	}
+	ViewChanged.Broadcast();
 }
 
 void APocketPlayer::MoveUp(float InputValue)

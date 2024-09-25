@@ -8,7 +8,7 @@
 #include "InputMappingContext.h"
 #include "PocketPlayer.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRotated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FViewChanged);
 
 class UCameraComponent;
 class USpringArmComponent;
@@ -28,7 +28,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY()
-	FRotated Rotated;
+	FViewChanged ViewChanged;
 
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 100.f;

@@ -28,7 +28,7 @@ void AOneWayView::BeginPlay()
 	if (Player)
 	{
 		GameCamera = Player->Camera;
-		Player->Rotated.AddDynamic(this, &AOneWayView::SetVisibility);
+		Player->ViewChanged.AddDynamic(this, &AOneWayView::SetVisibility);
 	}
 
 	if (!GameCamera || !Player) UE_LOG(LogTemp, Warning, TEXT("OneWayView: Failed to get Game Camera or Player Pawn!!!"));
@@ -46,7 +46,7 @@ void AOneWayView::SetVisibility()
 {
 	if (!StaticMesh || !GameCamera) return;
 
-	FVector SeparationVector = GetActorLocation() - GameCamera->GetComponentLocation();
+	FVector SeparationVector = GetActorLocation() - (GameCamera->GetComponentLocation() - GameCamera->GetForwardVector() * 100.f);
 
 	float VectorDot = GetActorForwardVector().Dot(SeparationVector);
 
