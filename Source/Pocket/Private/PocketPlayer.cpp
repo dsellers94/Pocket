@@ -18,14 +18,13 @@ APocketPlayer::APocketPlayer()
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->bDoCollisionTest = false;
 
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera")); 
 	Camera->SetupAttachment(SpringArm);
 }
 
 void APocketPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void APocketPlayer::Tick(float DeltaTime)
@@ -39,6 +38,7 @@ void APocketPlayer::Rotate(float InputValue)
 	FRotator Rotation = GetActorRotation();
 	FRotator NewRotation = FRotator(Rotation.Pitch, Rotation.Yaw + InputValue * RotationRate * GetWorld()->GetDeltaSeconds(), Rotation.Roll);
 	SetActorRotation(NewRotation);
+	Rotated.Broadcast();
 }
 
 void APocketPlayer::Zoom(float InputValue)

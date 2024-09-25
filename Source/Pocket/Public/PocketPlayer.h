@@ -8,6 +8,8 @@
 #include "InputMappingContext.h"
 #include "PocketPlayer.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRotated);
+
 class UCameraComponent;
 class USpringArmComponent;
 
@@ -24,6 +26,9 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY()
+	FRotated Rotated;
 
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 100.f;
@@ -49,8 +54,6 @@ public:
 	UFUNCTION()
 	void MoveUp(float InputValue);
 
-private:
-
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
 
@@ -59,5 +62,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USceneComponent> DefaultRoot;
+
+private:
+
+
 
 };
