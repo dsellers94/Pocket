@@ -51,6 +51,4 @@ void AOneWayView::SetVisibility()
 	float VectorDot = GetActorForwardVector().Dot(SeparationVector);
 
 	StaticMesh->SetVisibility(VectorDot < 0.f);
-
-	UE_LOG(LogTemp, Warning, TEXT("OneWayView: RotationDetected"));
 }
