@@ -12,6 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FViewChanged);
 
 class UCameraComponent;
 class USpringArmComponent;
+class IInteractInterface;
 
 UCLASS()
 class POCKET_API APocketPlayer : public APawn
@@ -21,8 +22,27 @@ class POCKET_API APocketPlayer : public APawn
 public:
 	APocketPlayer();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool CursorActive = true;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AActor> ActorUnderCursor;
+
+	TScriptInterface<IInteractInterface> CurrentInteractable;
+
+	UPROPERTY(BlueprintReadOnly)
+	FHitResult HitUnderCursor;
+
+	UPROPERTY(EditAnywhere)
+	float CursorTraceDistance = 10000.f;
+
+
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void CursorTrace();
+
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -53,6 +73,9 @@ public:
 
 	UFUNCTION()
 	void MoveUp(float InputValue);
+
+	UFUNCTION()
+	void Interact(bool InputValue);
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCameraComponent> Camera;

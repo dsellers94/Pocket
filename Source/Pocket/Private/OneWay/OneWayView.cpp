@@ -50,5 +50,6 @@ void AOneWayView::SetVisibility()
 
 	float VectorDot = GetActorForwardVector().Dot(SeparationVector);
 
-	StaticMesh->SetVisibility(VectorDot < 0.f);
+	//StaticMesh->SetVisibility(VectorDot < 0.f);
+	DefaultRoot->SetVisibility(VectorDot < 0.f, true);
 }

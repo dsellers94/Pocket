@@ -25,6 +25,7 @@ void APocketPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(inputRotate, ETriggerEvent::Triggered, this, &APocketPlayerController::EnhancedRotate);
 	EnhancedInput->BindAction(inputZoom, ETriggerEvent::Triggered, this, &APocketPlayerController::EnhancedZoom);
 	EnhancedInput->BindAction(inputMoveUp, ETriggerEvent::Triggered, this, &APocketPlayerController::EnhancedMoveUp);
+	EnhancedInput->BindAction(inputInteract, ETriggerEvent::Triggered, this, &APocketPlayerController::EnhancedInteract);
 
 }
 
@@ -55,6 +56,15 @@ void APocketPlayerController::EnhancedMoveUp(const FInputActionValue& Value)
 	if (!ControlledPlayer) return;
 
 	ControlledPlayer->MoveUp(AxisValue);
+}
+
+void APocketPlayerController::EnhancedInteract(const FInputActionValue& Value)
+{
+	const bool InputValue = Value.Get<bool>();
+
+	if (!ControlledPlayer) return;
+
+	ControlledPlayer->Interact(InputValue);
 }
 
 

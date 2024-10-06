@@ -26,6 +26,7 @@ public:
 	void EnhancedRotate(const FInputActionValue& Value);
 	void EnhancedZoom(const FInputActionValue& Value);
 	void EnhancedMoveUp(const FInputActionValue& Value);
+	void EnhancedInteract(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
 	UInputAction* inputRotate;
@@ -35,6 +36,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
 	UInputAction* inputMoveUp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
+	UInputAction* inputInteract;
 
 	UPROPERTY()
 	APocketPlayer* ControlledPlayer;

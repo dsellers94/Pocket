@@ -6,6 +6,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "InteractInterface.h"
 
 APocketPlayer::APocketPlayer()
 {
@@ -31,6 +33,28 @@ void APocketPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (CursorActive) CursorTrace();
+}
+
+void APocketPlayer::CursorTrace()
+{
+	FVector CameraForward = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector();
+
+	//TODO: Make this an actual cursor hit trace instead of camera forwad trace!!!
+	GetWorld()->LineTraceSingleByChannel(HitUnderCursor, Camera->GetComponentLocation(), CameraForward * CursorTraceDistance, ECollisionChannel::ECC_Visibility);
+
+	ActorUnderCursor = HitUnderCursor.GetActor();
+
+	if (ActorUnderCursor && ActorUnderCursor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
+	{
+		CurrentInteractable.SetObject(ActorUnderCursor);
+	}
+	else
+	{
+		CurrentInteractable.SetObject(nullptr);
+	}
+	
+
 }
 
 void APocketPlayer::Rotate(float InputValue)
@@ -55,6 +79,26 @@ void APocketPlayer::MoveUp(float InputValue)
 	FVector Location = GetActorLocation();
 	FVector NewLocation = FVector(Location.X, Location.Y, Location.Z + InputValue * MoveUpRate);
 	SetActorLocation(NewLocation);
+}
+
+void APocketPlayer::Interact(bool InputValue)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Pocket: ActorUnderCursor: %s"), *ActorUnderCursor->GetName());
+
+	if (!CurrentInteractable.GetObject()) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Pocket: Interactable: %s"), *CurrentInteractable.GetObject()->GetName());
+
+	UObject* InteractionObject = CurrentInteractable.GetObject();
+
+	if (InputValue)
+	{
+		IInteractInterface::Execute_Interact(InteractionObject);
+	}
+	else
+	{
+		IInteractInterface::Execute_StopInteracting(InteractionObject);
+	}
 }
 
 
