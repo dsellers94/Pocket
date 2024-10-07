@@ -38,10 +38,7 @@ void APocketPlayer::Tick(float DeltaTime)
 
 void APocketPlayer::CursorTrace()
 {
-	FVector CameraForward = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector();
-
-	//TODO: Make this an actual cursor hit trace instead of camera forwad trace!!!
-	GetWorld()->LineTraceSingleByChannel(HitUnderCursor, Camera->GetComponentLocation(), CameraForward * CursorTraceDistance, ECollisionChannel::ECC_Visibility);
+	GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, HitUnderCursor);
 
 	ActorUnderCursor = HitUnderCursor.GetActor();
 
@@ -51,10 +48,9 @@ void APocketPlayer::CursorTrace()
 	}
 	else
 	{
+		if (CurrentInteractable.GetObject()) LastInteractable = CurrentInteractable;
 		CurrentInteractable.SetObject(nullptr);
 	}
-	
-
 }
 
 void APocketPlayer::Rotate(float InputValue)
@@ -83,21 +79,26 @@ void APocketPlayer::MoveUp(float InputValue)
 
 void APocketPlayer::Interact(bool InputValue)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Pocket: ActorUnderCursor: %s"), *ActorUnderCursor->GetName());
-
-	if (!CurrentInteractable.GetObject()) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("Pocket: Interactable: %s"), *CurrentInteractable.GetObject()->GetName());
-
-	UObject* InteractionObject = CurrentInteractable.GetObject();
-
 	if (InputValue)
 	{
-		IInteractInterface::Execute_Interact(InteractionObject);
+		if (CurrentInteractable.GetObject())
+		{
+			UObject* InteractionObject = CurrentInteractable.GetObject();
+			IInteractInterface::Execute_Interact(InteractionObject, HitUnderCursor.ImpactPoint);
+		}
 	}
 	else
 	{
-		IInteractInterface::Execute_StopInteracting(InteractionObject);
+		if (CurrentInteractable.GetObject())
+		{
+			UObject* InteractionObject = CurrentInteractable.GetObject();
+			IInteractInterface::Execute_StopInteracting(InteractionObject);
+		}
+		else if (LastInteractable.GetObject())
+		{
+			UObject* InteractionObject = LastInteractable.GetObject();
+			IInteractInterface::Execute_StopInteracting(InteractionObject);
+		}
 	}
 }
 

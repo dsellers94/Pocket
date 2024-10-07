@@ -30,6 +30,8 @@ public:
 
 	TScriptInterface<IInteractInterface> CurrentInteractable;
 
+	TScriptInterface<IInteractInterface> LastInteractable;
+
 	UPROPERTY(BlueprintReadOnly)
 	FHitResult HitUnderCursor;
 

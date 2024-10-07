@@ -26,9 +26,11 @@ void ASlidable::Tick(float DeltaTime)
 
 }
 
-void ASlidable::Interact_Implementation()
+void ASlidable::Interact_Implementation(FVector InteractionPoint)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Slidable: I AM THE CHOSEN ONE!"));
+	FVector ImpactSeparationNormal = (GetActorLocation() - InteractionPoint).GetSafeNormal();
+
 }
 
 void ASlidable::StopInteracting_Implementation()

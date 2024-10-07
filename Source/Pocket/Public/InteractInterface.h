@@ -23,7 +23,7 @@ class POCKET_API IInteractInterface
 public:
 
 	UFUNCTION(BlueprintNativeEvent)
-	void Interact();
+	void Interact(FVector InteractionPoint);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void StopInteracting();

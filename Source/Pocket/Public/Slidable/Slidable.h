@@ -21,7 +21,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UStaticMeshComponent> StaticMesh;
 
-	virtual void Interact_Implementation() override;
+	virtual void Interact_Implementation(FVector InteractionPoint) override;
 
 	virtual void StopInteracting_Implementation() override;
 
