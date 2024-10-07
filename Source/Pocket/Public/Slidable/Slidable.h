@@ -21,12 +21,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UStaticMeshComponent> StaticMesh;
 
+	UPROPERTY(EditAnywhere)
+	float SlideBackwardsCutoff = -0.707;
+
+	UPROPERTY(EditAnywhere)
+	float SlideSideCutoff = 0.707;
+
+	UPROPERTY(EditAnywhere)
+	float SlidingSpeed = 100.f;
+
 	virtual void Interact_Implementation(FVector InteractionPoint) override;
 
 	virtual void StopInteracting_Implementation() override;
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY()
+	bool bIsSliding = false;
+
+	UPROPERTY()
+	FVector SlidingDirection;
+
+	UFUNCTION()
+	void Slide(float DeltaTime);
 
 public:	
 	virtual void Tick(float DeltaTime) override;

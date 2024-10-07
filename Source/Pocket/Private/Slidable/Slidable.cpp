@@ -24,16 +24,57 @@ void ASlidable::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bIsSliding) Slide(DeltaTime);
+
+}
+
+void ASlidable::Slide(float DeltaTime)
+{
+	FHitResult BumpHit;
+	SetActorLocation(GetActorLocation() + SlidingDirection * SlidingSpeed * DeltaTime);
 }
 
 void ASlidable::Interact_Implementation(FVector InteractionPoint)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Slidable: I AM THE CHOSEN ONE!"));
+	bIsSliding = true;
+
 	FVector ImpactSeparationNormal = (GetActorLocation() - InteractionPoint).GetSafeNormal();
+
+	FVector2D ImpactSeparationNormal2D = FVector2D(ImpactSeparationNormal.X, ImpactSeparationNormal.Y);
+	FVector2D ForwardVector2D = FVector2D(GetActorForwardVector().X, GetActorForwardVector().Y);
+	FVector2D RightVector2D = FVector2D(GetActorRightVector().X, GetActorRightVector().Y);
+
+	float ForwardVectorDot2D = ImpactSeparationNormal2D.Dot(ForwardVector2D);
+	float RightVectorDot2D = ImpactSeparationNormal2D.Dot(RightVector2D);
+
+	if (ForwardVectorDot2D < SlideBackwardsCutoff)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sliding Backward"));
+		SlidingDirection = -GetActorForwardVector();
+	}
+	else if (ForwardVectorDot2D < SlideSideCutoff)
+	{
+		if (RightVectorDot2D > 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Sliding Right"));
+			SlidingDirection = GetActorRightVector();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Sliding Left"));
+			SlidingDirection = -GetActorRightVector();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sliding Forward"));
+		SlidingDirection = GetActorForwardVector();
+	}
 
 }
 
 void ASlidable::StopInteracting_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Slidable: I am the unchosen one..."));
+	bIsSliding = false;
+	UE_LOG(LogTemp, Warning, TEXT("Slidable: I'll just stop right here"));
 }
