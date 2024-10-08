@@ -11,7 +11,9 @@ ASlidable::ASlidable()
 	SetRootComponent(DefaultRoot);
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	StaticMesh->SetupAttachment(DefaultRoot);
+	StaticMesh->SetupAttachment(RootComponent);
+	StaticMesh->OnComponentBeginOverlap.AddDynamic(this, &ASlidable::OnMeshBeginOverlap);
+	//StaticMesh->OnComponentHit.AddDynamic(this, &ASlidable::OnHit);
 }
 
 void ASlidable::BeginPlay()
@@ -25,7 +27,6 @@ void ASlidable::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (bIsSliding) Slide(DeltaTime);
-
 }
 
 void ASlidable::Slide(float DeltaTime)
@@ -77,4 +78,16 @@ void ASlidable::StopInteracting_Implementation()
 {
 	bIsSliding = false;
 	UE_LOG(LogTemp, Warning, TEXT("Slidable: I'll just stop right here"));
+}
+
+void ASlidable::OnMeshBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Slidable: OverlapDetected"));
+	bIsSliding = false;
+}
+
+void ASlidable::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Slidable: Hit Detected"));
+	bIsSliding = false;
 }
