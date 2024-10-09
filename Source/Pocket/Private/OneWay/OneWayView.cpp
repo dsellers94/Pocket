@@ -14,6 +14,8 @@ AOneWayView::AOneWayView()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMesh->SetupAttachment(DefaultRoot);
+	StaticMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	StaticMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 
 }
 
