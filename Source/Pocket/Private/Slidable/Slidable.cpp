@@ -2,6 +2,7 @@
 
 
 #include "Slidable/Slidable.h"
+#include "Kismet/GameplayStatics.h"
 
 ASlidable::ASlidable()
 {
@@ -12,8 +13,6 @@ ASlidable::ASlidable()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMesh->SetupAttachment(RootComponent);
-	StaticMesh->OnComponentBeginOverlap.AddDynamic(this, &ASlidable::OnMeshBeginOverlap);
-	//StaticMesh->OnComponentHit.AddDynamic(this, &ASlidable::OnHit);
 }
 
 void ASlidable::BeginPlay()
@@ -32,7 +31,16 @@ void ASlidable::Tick(float DeltaTime)
 void ASlidable::Slide(float DeltaTime)
 {
 	FHitResult BumpHit;
+	LastLocation = GetActorLocation();
 	SetActorLocation(GetActorLocation() + SlidingDirection * SlidingSpeed * DeltaTime);
+	TArray<AActor*> CollidingActors;
+	GetOverlappingActors(CollidingActors);
+	if (CollidingActors.Num() > 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Slidable: Colliding Actors: %d"), CollidingActors.Num());
+		SetActorLocation(LastLocation);
+		bIsSliding = false;
+	}
 }
 
 void ASlidable::Interact_Implementation(FVector InteractionPoint)
@@ -80,14 +88,3 @@ void ASlidable::StopInteracting_Implementation()
 	UE_LOG(LogTemp, Warning, TEXT("Slidable: I'll just stop right here"));
 }
 
-void ASlidable::OnMeshBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Slidable: OverlapDetected"));
-	bIsSliding = false;
-}
-
-void ASlidable::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Slidable: Hit Detected"));
-	bIsSliding = false;
-}
