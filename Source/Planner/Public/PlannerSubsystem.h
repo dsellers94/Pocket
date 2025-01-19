@@ -65,10 +65,13 @@ private:
 	TArray<FActionNode> ActionNodes;
 
 	UFUNCTION()
-	TArray<FAction> ReconstructPlan(FGuid FirstAction, EWorldStateKey GoalKey, bool GoalValue);
+	TArray<FAction> ReconstructPlan(FGuid FirstActionID, EWorldStateKey GoalKey, bool GoalValue);
 
 	UFUNCTION()
-	FAction FetchActionByGuid(FGuid ActionID);
+	FAction FetchActionFromCurrentSetByGuid(FGuid ActionID);
+
+	UFUNCTION()
+	FActionNode FetchActionNodeByGuid(FGuid ActionID);
 
 	
 };

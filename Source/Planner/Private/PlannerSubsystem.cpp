@@ -23,20 +23,28 @@ TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, EWorldSt
 {
 	TArray<FAction> Plan = TArray<FAction>();
 
-	TMap<EWorldStateKey, bool> CurrentActionEffects = FetchActionByGuid(FirstActionID).Effects;
+	// Set CurrentActionID and the effects to be checked to the last action in the plan
+	TMap<EWorldStateKey, bool> CurrentActionEffects = FetchActionFromCurrentSetByGuid(FirstActionID).Effects;
+	FGuid CurrentActionID = FirstActionID;
 
-	FGuid CurrentActionID;
-
+	// Until we detect that the effects of the current action satisfy the goal state, Get the CurrentAction by it's ID and add it to the plan.
+	// Then check if we should break. If not, set the CurrentActionID to that of the ParentActionID of the CurrentActionNode.
 	while (true)
 	{
-		FAction CurrentAction = 
+		FAction CurrentAction = FetchActionFromCurrentSetByGuid(CurrentActionID);
+		FActionNode CurrentActionNode = FetchActionNodeByGuid(CurrentActionID);
+		CurrentActionEffects = CurrentAction.Effects;
+		Plan.Add(CurrentAction);
+
 		if (CurrentActionEffects.Contains(GoalKey) && CurrentActionEffects[GoalKey] == GoalValue) break;
+
+		CurrentActionID = CurrentActionNode.ParentActionID;
 	}
 
 	return Plan;
 }
 
-FAction UPlannerSubsystem::FetchActionByGuid(FGuid ActionID)
+FAction UPlannerSubsystem::FetchActionFromCurrentSetByGuid(FGuid ActionID)
 {
 	for (FAction Action : CurrentActionSet)
 	{
@@ -49,6 +57,21 @@ FAction UPlannerSubsystem::FetchActionByGuid(FGuid ActionID)
 	UE_LOG(LogPlanner, Error, TEXT("No Action Found for given ActionID! Likely a fatal error!"));
 	
 	return FAction();
+}
+
+FActionNode UPlannerSubsystem::FetchActionNodeByGuid(FGuid ActionID)
+{
+	for (FActionNode ActionNode : ActionNodes)
+	{
+		if (ActionNode.ActionID == ActionID)
+		{
+			return ActionNode;
+		}
+	}
+
+	UE_LOG(LogPlanner, Error, TEXT("No ActionNode Found for given ActionID! Likely a fatal error!"));
+
+	return FActionNode();
 }
 
 
