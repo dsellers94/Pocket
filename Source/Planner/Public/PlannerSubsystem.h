@@ -24,7 +24,7 @@ public:
 	UFUNCTION()
 	TArray<FAction> GeneratePlan(
 		APlannerAIController* Agent,
-		TArray<FAction> ActionSet,
+		const TArray<FAction>& ActionSet,
 		TMap<EWorldStateKey, bool> WorldState, 
 		EWorldStateKey GoalKey,
 		bool GoalValue);
@@ -38,12 +38,31 @@ private:
 	TArray<FGuid> ClosedActions = TArray<FGuid>();
 
 	UPROPERTY()
-	TArray<FAction> CurrentActionSet = TArray<FAction>();
+	TArray<FAction> CurrentActionSet;
+
+	UPROPERTY()
+	int BestCost = INT_MAX;
+
+	UPROPERTY()
+	FGuid RootID;
+
+	TArray<FGuid> OpenSet = TArray<FGuid>();
+
+	TArray<FGuid> ClosedSet = TArray<FGuid>();
 
 	UFUNCTION()
 	TArray<FAction> ReconstructPlan(FGuid FirstActionID, EWorldStateKey GoalKey, bool GoalValue);
 
 	UFUNCTION()
 	FAction FetchActionFromCurrentSetByID(FGuid ActionID);
+
+	UFUNCTION()
+	bool CheckConditionsAgainstWorldState(const TMap<EWorldStateKey, bool>& InUnsatisfiedConditions, const TMap<EWorldStateKey, bool>& InWorldState);
+
+	UFUNCTION()
+	bool CheckAndUpdateBestCost(FGuid ActionID);
+
+	UFUNCTION()
+	void AppendMapNonDestructive(TMap<EWorldStateKey, bool>& TargetMap, TMap<EWorldStateKey, bool>& SourceMap);
 	
 };
