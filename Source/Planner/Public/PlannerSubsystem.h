@@ -11,27 +11,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlanningComplete);
 
-USTRUCT(BlueprintType)
-struct FActionNode
-{
-	GENERATED_BODY()
-
-public:
-
-	UPROPERTY()
-	FGuid ActionID;
-
-	UPROPERTY()
-	FGuid ParentActionID;
-
-	UPROPERTY()
-	int Cost = 0;
-
-	UPROPERTY()
-	TMap<EWorldStateKey, bool> UnSatisfiedConditions;
-
-};
-
 UCLASS()
 class PLANNER_API UPlannerSubsystem : public UGameInstanceSubsystem
 {
@@ -61,17 +40,10 @@ private:
 	UPROPERTY()
 	TArray<FAction> CurrentActionSet = TArray<FAction>();
 
-	UPROPERTY()
-	TArray<FActionNode> ActionNodes;
-
 	UFUNCTION()
 	TArray<FAction> ReconstructPlan(FGuid FirstActionID, EWorldStateKey GoalKey, bool GoalValue);
 
 	UFUNCTION()
-	FAction FetchActionFromCurrentSetByGuid(FGuid ActionID);
-
-	UFUNCTION()
-	FActionNode FetchActionNodeByGuid(FGuid ActionID);
-
+	FAction FetchActionFromCurrentSetByID(FGuid ActionID);
 	
 };

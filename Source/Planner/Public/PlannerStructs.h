@@ -33,16 +33,25 @@ struct FAction
 public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGuid ActionID;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TMap<EWorldStateKey, bool> Preconditions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TMap<EWorldStateKey, bool> Effects;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;
+	UPROPERTY()
+	FGuid ParentActionID;
+
+	UPROPERTY()
+	int Cost = INT_MAX;
+
+	UPROPERTY()
+	TMap<EWorldStateKey, bool> UnSatisfiedConditions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGuid ActionID;
+	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;
 };
 
 USTRUCT(BlueprintType)

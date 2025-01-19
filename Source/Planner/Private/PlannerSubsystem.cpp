@@ -13,7 +13,37 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 {
 	TArray<FAction> Plan = TArray<FAction>();
 
+	TArray<FGuid> OpenSet = TArray<FGuid>();
+
+	TArray<FGuid> ClosedSet = TArray<FGuid>();
+
 	CurrentActionSet = ActionSet;
+
+	int CurrentCost = 0;
+
+	for (FAction CheckAction : CurrentActionSet)
+	{
+		FGuid CheckActionID = CheckAction.ActionID;
+		if (CheckAction.Effects.Contains(GoalKey) && CheckAction.Effects[GoalKey] == GoalValue)
+		{
+			CheckAction.Cost = 1;
+			CheckAction.UnSatisfiedConditions = CheckAction.Preconditions;
+			OpenSet.Add(CheckActionID);
+		}
+	}
+
+	while (!OpenSet.IsEmpty())
+	{
+		FGuid CheckActionID = OpenSet.Pop();
+		FAction CheckAction = FetchActionFromCurrentSetByID(CheckActionID);
+		if (CheckAction.Effects.Contains(GoalKey) && CheckAction.Effects[GoalKey] == GoalValue)
+		{
+			//ToDo: This is where we might spawn a ContextCheckActor, or now that I think of it, call a more general Context Checker. Either way, ignoring that step for now
+			// CONTINUE ALGORITHM FROM HERE
+		}
+	}
+
+
 
 
 	return Plan;
@@ -24,27 +54,27 @@ TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, EWorldSt
 	TArray<FAction> Plan = TArray<FAction>();
 
 	// Set CurrentActionID and the effects to be checked to the last action in the plan
-	TMap<EWorldStateKey, bool> CurrentActionEffects = FetchActionFromCurrentSetByGuid(FirstActionID).Effects;
+	TMap<EWorldStateKey, bool> CurrentActionEffects = FetchActionFromCurrentSetByID(FirstActionID).Effects;
 	FGuid CurrentActionID = FirstActionID;
 
 	// Until we detect that the effects of the current action satisfy the goal state, Get the CurrentAction by it's ID and add it to the plan.
-	// Then check if we should break. If not, set the CurrentActionID to that of the ParentActionID of the CurrentActionNode.
+	// Then break if the effects of the CurrentAction satisfy the goal state. 
+	// If not, set the CurrentActionID to that of the ParentActionID of the CurrentActionNode and continue.
 	while (true)
 	{
-		FAction CurrentAction = FetchActionFromCurrentSetByGuid(CurrentActionID);
-		FActionNode CurrentActionNode = FetchActionNodeByGuid(CurrentActionID);
+		FAction CurrentAction = FetchActionFromCurrentSetByID(CurrentActionID);
 		CurrentActionEffects = CurrentAction.Effects;
 		Plan.Add(CurrentAction);
 
 		if (CurrentActionEffects.Contains(GoalKey) && CurrentActionEffects[GoalKey] == GoalValue) break;
 
-		CurrentActionID = CurrentActionNode.ParentActionID;
+		CurrentActionID = CurrentAction.ParentActionID;
 	}
 
 	return Plan;
 }
 
-FAction UPlannerSubsystem::FetchActionFromCurrentSetByGuid(FGuid ActionID)
+FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID)
 {
 	for (FAction Action : CurrentActionSet)
 	{
@@ -59,19 +89,5 @@ FAction UPlannerSubsystem::FetchActionFromCurrentSetByGuid(FGuid ActionID)
 	return FAction();
 }
 
-FActionNode UPlannerSubsystem::FetchActionNodeByGuid(FGuid ActionID)
-{
-	for (FActionNode ActionNode : ActionNodes)
-	{
-		if (ActionNode.ActionID == ActionID)
-		{
-			return ActionNode;
-		}
-	}
-
-	UE_LOG(LogPlanner, Error, TEXT("No ActionNode Found for given ActionID! Likely a fatal error!"));
-
-	return FActionNode();
-}
 
 
