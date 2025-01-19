@@ -4,3 +4,5 @@
 #include "Modules/ModuleManager.h"
 
 IMPLEMENT_MODULE(FDefaultModuleImpl, Planner);
+
+DEFINE_LOG_CATEGORY(LogPlanner);

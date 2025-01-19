@@ -25,6 +25,11 @@ struct FAction
 {
 	GENERATED_BODY()
 
+	bool operator==(const FAction& Other) const
+	{
+		return ActionID == Other.ActionID;
+	}
+
 public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -35,6 +40,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGuid ActionID;
 };
 
 USTRUCT(BlueprintType)

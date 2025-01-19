@@ -20,6 +20,7 @@ protected:
 	UPROPERTY()
 	TMap<EWorldStateKey, bool> WorldState;
 
-
+	UPROPERTY()
+	TArray<FAction> ActionSet = TArray<FAction>();
 	
 };
