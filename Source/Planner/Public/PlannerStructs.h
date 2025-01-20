@@ -33,7 +33,7 @@ struct FAction
 public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGuid ActionID;
+	FGuid ActionID = FGuid::NewGuid();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TMap<EWorldStateKey, bool> Preconditions;
