@@ -15,6 +15,11 @@ class PLANNER_API APlannerAIController : public AAIController
 {
 	GENERATED_BODY()
 
+public:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<FDataTableRowHandle> ActionRows;
+
 protected:
 
 	UPROPERTY()
@@ -22,5 +27,9 @@ protected:
 
 	UPROPERTY()
 	TArray<FAction> ActionSet = TArray<FAction>();
+
+protected:
+	
+	virtual void OnPossess(APawn* InPawn) override;
 	
 };

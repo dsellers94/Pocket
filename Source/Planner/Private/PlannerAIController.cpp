@@ -3,3 +3,7 @@
 
 #include "PlannerAIController.h"
 
+void APlannerAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+}
