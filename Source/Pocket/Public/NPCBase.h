@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "NPCBase.generated.h"
 
+class UPlannerComponent;
+
 UCLASS()
 class POCKET_API ANPCBase : public APawn
 {
@@ -13,6 +15,9 @@ class POCKET_API ANPCBase : public APawn
 
 public:
 	ANPCBase();
+
+	UPROPERTY()
+	TObjectPtr<UPlannerComponent> PlannerComponent = nullptr;
 
 protected:
 	virtual void BeginPlay() override;

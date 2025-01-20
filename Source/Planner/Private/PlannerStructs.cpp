@@ -10,3 +10,8 @@ PlannerStructs::PlannerStructs()
 PlannerStructs::~PlannerStructs()
 {
 }
+
+FString FAction::ToString() const
+{
+    return *ActionName.ToString();
+}

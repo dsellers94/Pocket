@@ -2,11 +2,13 @@
 
 
 #include "NPCBase.h"
+#include "PlannerComponent.h"
 
 ANPCBase::ANPCBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	PlannerComponent = CreateDefaultSubobject<UPlannerComponent>("PlannerComponent");
 }
 
 void ANPCBase::BeginPlay()

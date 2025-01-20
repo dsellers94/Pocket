@@ -33,6 +33,9 @@ struct FAction
 public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName ActionName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGuid ActionID = FGuid::NewGuid();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -52,6 +55,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;
+
+	FString ToString() const;
 };
 
 USTRUCT(BlueprintType)
