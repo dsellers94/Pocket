@@ -7,19 +7,6 @@
 
 class AContextCheckActor;
 
-UENUM(BlueprintType)
-enum class EWorldStateKey : uint8
-{
-	EWK_FoodIsDelivered,
-	EWK_IsHoldingFood,
-	EWK_IsHoldingSeeds,
-	EWK_IsHoldingPlow,
-	EWK_FoodOnMap,
-	EWK_SeedsOnMap,
-	EWK_SoilOnMap,
-	EWK_PlowOnMap
-};
-
 USTRUCT(BlueprintType)
 struct FAction
 {
@@ -39,10 +26,10 @@ public:
 	FGuid ActionID = FGuid::NewGuid();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<EWorldStateKey, bool> Preconditions;
+	TMap<FName, bool> Preconditions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<EWorldStateKey, bool> Effects;
+	TMap<FName, bool> Effects;
 
 	UPROPERTY()
 	FGuid ParentActionID;
@@ -51,7 +38,7 @@ public:
 	int Cost = INT_MAX;
 
 	UPROPERTY()
-	TMap<EWorldStateKey, bool> UnSatisfiedConditions;
+	TMap<FName, bool> UnSatisfiedConditions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;

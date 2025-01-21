@@ -17,8 +17,9 @@ class PLANNER_API UPlannerComponent : public UActorComponent
 public:	
 	UPlannerComponent();
 
-	UPROPERTY()
-	TArray<FAction> ActionSet;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FDataTableRowHandle> ActionRows;
+
 
 protected:
 	virtual void BeginPlay() override;

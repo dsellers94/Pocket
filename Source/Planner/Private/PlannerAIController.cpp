@@ -6,6 +6,8 @@
 #include "Engine/AssetManager.h"
 #include "Planner/Planner.h"
 #include "PlannerComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlannerSubsystem.h"
 
 
 void APlannerAIController::BeginPlay()
@@ -33,7 +35,60 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 		return;
 	}
 
-	ActionSet = ControlledPlannerComponent->ActionSet;
+	ActionRows = ControlledPlannerComponent->ActionRows;
+
+	GenerateActionSetFromRows();
 }
 
+void APlannerAIController::GenerateActionSetFromRows()
+{
+	for (const FDataTableRowHandle& Row : ActionRows)
+	{
+		const FActionRow* FoundRow = Row.GetRow<FActionRow>(__FUNCTION__);
+		if (FoundRow == nullptr)
+		{
+			UE_LOG(LogPlanner, Error, TEXT("PlannerAIController: Failed to get action data from Action Row Handle"));
+			return;
+		}
+		ActionSet.Add(FoundRow->Action);
+	}
+}
+
+void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
+{
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+	if (!IsValid(GameInstance))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Failed to get GameInstance while requesting plan"));
+		return;
+	}
+	
+	UPlannerSubsystem* PlannerSubsystem = GameInstance->GetSubsystem<UPlannerSubsystem>();
+	
+	if (!IsValid(PlannerSubsystem))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Failed to get PlannerSubsystem while requesting plan"));
+		return;
+	}
+
+	CurrentPlan = PlannerSubsystem->GeneratePlan(this, ActionSet, WorldState, GoalKey, GoalValue);
+}
+
+
+void APlannerAIController::PrintActionSet()
+{
+	for (FAction Action : ActionSet)
+	{
+		FString ActionString = Action.ToString();
+		UE_LOG(LogPlanner, Warning, TEXT("%s"), *ActionString);
+	}
+}
+
+void APlannerAIController::PrintCurrentPlan()
+{
+	for (FAction Action : ActionSet)
+	{
+		UE_LOG(LogPlanner, Warning, TEXT("%s"), *Action.ActionName.ToString());
+	}
+}
 

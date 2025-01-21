@@ -16,7 +16,7 @@ class POCKET_API ANPCBase : public APawn
 public:
 	ANPCBase();
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlannerComponent> PlannerComponent = nullptr;
 
 protected:

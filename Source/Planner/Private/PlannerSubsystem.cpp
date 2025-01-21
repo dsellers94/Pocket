@@ -10,8 +10,8 @@
 TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	APlannerAIController* Agent, 
 	const TArray<FAction>& ActionSet,
-	TMap<EWorldStateKey, bool> WorldState, 
-	EWorldStateKey GoalKey,
+	TMap<FName, bool> WorldState, 
+	FName GoalKey,
 	bool GoalValue)
 {
 	TArray<FAction> Plan = TArray<FAction>();
@@ -101,7 +101,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	return Plan;
 }
 
-TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, EWorldStateKey GoalKey, bool GoalValue)
+TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, FName GoalKey, bool GoalValue)
 {
 	TArray<FAction> Plan = TArray<FAction>();
 
@@ -135,7 +135,7 @@ FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID)
 	return FAction();
 }
 
-bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TMap<EWorldStateKey, bool>& InUnsatisfiedConditions, const TMap<EWorldStateKey, bool>& InWorldState)
+bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState)
 {
 	for (auto UnSatPair : InUnsatisfiedConditions)
 	{
@@ -167,7 +167,7 @@ bool UPlannerSubsystem::CheckAndUpdateBestCost(FGuid ActionID)
 	}
 }
 
-void UPlannerSubsystem::AppendMapNonDestructive(TMap<EWorldStateKey, bool>& TargetMap, TMap<EWorldStateKey, bool>& SourceMap)
+void UPlannerSubsystem::AppendMapNonDestructive(TMap<FName, bool>& TargetMap, TMap<FName, bool>& SourceMap)
 {
 	for (const auto& pair : SourceMap)
 	{

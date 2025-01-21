@@ -15,21 +15,41 @@ class PLANNER_API APlannerAIController : public AAIController
 {
 	GENERATED_BODY()
 
-protected:
+public: 
 
-	UPROPERTY()
-	TMap<EWorldStateKey, bool> WorldState;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<FName, bool> WorldState = TMap<FName, bool>();
+
+	UFUNCTION(BlueprintCallable)
+	void RequestPlan(FName GoalKey, bool GoalValue);
+
+	UFUNCTION(BlueprintCallable)
+	void PrintActionSet();
+
+	UFUNCTION(BlueprintCallable)
+	void PrintCurrentPlan();
+
+protected:
 
 	UPROPERTY()
 	TArray<FAction> ActionSet = TArray<FAction>();
 
 	UPROPERTY()
+	TArray<FDataTableRowHandle> ActionRows;
+
+	UPROPERTY()
 	TObjectPtr<UPlannerComponent> ControlledPlannerComponent = nullptr;
+
+	UPROPERTY()
+	TArray<FAction> CurrentPlan;
 
 
 protected:
 	
 	virtual void OnPossess(APawn* InPawn) override;
+
+	UFUNCTION()
+	void GenerateActionSetFromRows();
 
 private:
 
