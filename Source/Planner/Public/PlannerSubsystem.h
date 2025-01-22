@@ -32,12 +32,6 @@ public:
 private:
 
 	UPROPERTY()
-	TArray<FGuid> OpenActions = TArray<FGuid>();
-
-	UPROPERTY()
-	TArray<FGuid> ClosedActions = TArray<FGuid>();
-
-	UPROPERTY()
 	TArray<FAction> CurrentActionSet;
 
 	UPROPERTY()
@@ -46,12 +40,14 @@ private:
 	UPROPERTY()
 	FGuid RootID;
 
-	TArray<FGuid> OpenSet = TArray<FGuid>();
+	UPROPERTY()
+	TArray<FAction> OpenSet = TArray<FAction>();
 
-	TArray<FGuid> ClosedSet = TArray<FGuid>();
+	UPROPERTY()
+	TArray<FAction> ClosedSet = TArray<FAction>();
 
 	UFUNCTION()
-	TArray<FAction> ReconstructPlan(FGuid FirstActionID, FName GoalKey, bool GoalValue);
+	TArray<FAction> ReconstructPlan(FGuid FirstActionID, TArray<FAction> InActionSet, FName GoalKey, bool GoalValue);
 
 	UFUNCTION()
 	FAction FetchActionFromCurrentSetByID(FGuid ActionID);
@@ -60,7 +56,10 @@ private:
 	bool CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState);
 
 	UFUNCTION()
-	bool CheckAndUpdateBestCost(FGuid ActionID);
+	bool CheckSingleConditionAgainstWorldState(FName ConditionKey, bool ConditionValue, const TMap<FName, bool>& InWorldState);
+
+	UFUNCTION()
+	bool CheckAndUpdateBestCost(FAction Action);
 
 	UFUNCTION()
 	void AppendMapNonDestructive(TMap<FName, bool>& TargetMap, TMap<FName, bool>& SourceMap);

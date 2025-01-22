@@ -34,8 +34,8 @@ public:
 	UPROPERTY()
 	FGuid ParentActionID;
 
-	UPROPERTY()
-	int Cost = INT_MAX;
+	UPROPERTY(VisibleAnywhere)
+	int CalculatedCost = 0;
 
 	UPROPERTY()
 	TMap<FName, bool> UnSatisfiedConditions;

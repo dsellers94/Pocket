@@ -86,7 +86,7 @@ void APlannerAIController::PrintActionSet()
 
 void APlannerAIController::PrintCurrentPlan()
 {
-	for (FAction Action : ActionSet)
+	for (FAction Action : CurrentPlan)
 	{
 		UE_LOG(LogPlanner, Warning, TEXT("%s"), *Action.ActionName.ToString());
 	}

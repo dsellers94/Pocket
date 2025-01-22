@@ -15,30 +15,47 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	bool GoalValue)
 {
 	TArray<FAction> Plan = TArray<FAction>();
+	OpenSet.Empty();
+	ClosedSet.Empty();
+
+	if (!IsValid(Agent))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Invalid Agent, likelyt a fatal error"));
+	}
+	if (ActionSet.Num() == 0)
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Action Set is empty, planning aborted"));
+		return Plan;
+	}
+	if (WorldState.Num() == 0)
+	{
+		UE_LOG(LogPlanner, Error, TEXT("World State is empty, planning aborted"));
+		return Plan;
+	}
 	
 	CurrentActionSet = ActionSet; // Set global CurrentActionSet used by other methods in this class
 
 	RootID = FGuid::NewGuid(); // Set global RootID used to detect when actions adjacent to the goals state have been reached during plan reconstruction.
 
 	// Start by finding all actions whose effects satisfy the goal state (GoalKey and GoalValue), add them to the open set, set their costs, unsat. conds., and parent IDs
-	for (FAction CheckAction : ActionSet)
+	for (FAction CheckAction : CurrentActionSet)
 	{
 		FGuid CheckActionID = CheckAction.ActionID;
 		if (CheckAction.Effects.Contains(GoalKey) && CheckAction.Effects[GoalKey] == GoalValue)
 		{
-			CheckAction.Cost = 1;
+			CheckAction.CalculatedCost = 1;
 			CheckAction.UnSatisfiedConditions = CheckAction.Preconditions;
 			CheckAction.ParentActionID = RootID;
-			OpenSet.Add(CheckActionID);
+			OpenSet.Add(CheckAction);
 
 			// Handle the case of a one step plan. 
 			// We don't want to return early in this case: Our heauristic functions (each step costs 1 + a satisfied condition is closer to the target) are currently very simple,
 			// but we may want to implement a more sophisticated cost/closeness function in the future, so it's worht checking the remaining open nodes for now.
 			if (CheckConditionsAgainstWorldState(CheckAction.UnSatisfiedConditions, WorldState))
 			{
-				if (CheckAndUpdateBestCost(CheckActionID))
+				if (CheckAndUpdateBestCost(CheckAction))
 				{
-					Plan = ReconstructPlan(CheckActionID, GoalKey, GoalValue);
+					Plan = ReconstructPlan(CheckActionID, OpenSet, GoalKey, GoalValue);
 				}
 			}
 		}
@@ -46,15 +63,19 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 
 	while (!OpenSet.IsEmpty())
 	{
-		FGuid CurrentActionID = OpenSet.Pop();
-		ClosedSet.Add(CurrentActionID);
-		FAction CurrentAction = FetchActionFromCurrentSetByID(CurrentActionID);
+		FAction CurrentAction = OpenSet.Pop();
+		ClosedSet.Add(CurrentAction);
+		//FAction CurrentAction = FetchActionFromCurrentSetByID(CurrentActionID);
 
 		// Iterate over unsatisfied conditions stored on the current action (accumulate from previous actions explored on this path, I think)
 		for (auto UnSatPair : CurrentAction.UnSatisfiedConditions)
 		{
+			if (CheckSingleConditionAgainstWorldState(UnSatPair.Key, UnSatPair.Value, WorldState))
+			{
+				continue;
+			}
 			// Iterate over available actions
-			for (FAction CheckAction : ActionSet)
+			for (FAction CheckAction : CurrentActionSet)
 			{
 				// Check if the action satisfies any of our unsatisfied conditions.
 				if (CheckAction.Effects.Contains(UnSatPair.Key) && CheckAction.Effects[UnSatPair.Key] == UnSatPair.Value)
@@ -62,11 +83,11 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 					//ToDo: This is where we might spawn a ContextCheckActor, or now that I think of it, call a more general Context Checker. Either way, ignoring that step for now
 					
 					// Handle the case of an action we've already closed (update cost and conditions if it would be less than the cost already stored on that action)
-					if (ClosedSet.Contains(CheckAction.ActionID))
+					if (ClosedSet.Contains(CheckAction))
 					{
-						if (CurrentAction.Cost < CheckAction.Cost + 1)
+						if (CurrentAction.CalculatedCost + 1 < CheckAction.CalculatedCost)
 						{
-							CheckAction.Cost = CurrentAction.Cost + 1; // Set the new cost for the check action
+							CheckAction.CalculatedCost = CurrentAction.CalculatedCost + 1; // Set the new cost for the check action
 							CheckAction.ParentActionID = CurrentAction.ActionID;
 							CheckAction.UnSatisfiedConditions = CurrentAction.UnSatisfiedConditions; // Set the new set of unsat. conds. for the check action (inherited from current)
 							AppendMapNonDestructive(CheckAction.UnSatisfiedConditions, CheckAction.Preconditions); // Add the action's own preconditions back to the unsat. list
@@ -75,12 +96,12 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 					}
 					else
 					{
-						OpenSet.Add(CheckAction.ActionID);
-						CheckAction.Cost = CurrentAction.Cost + 1; // Set the new cost for the check action
+						CheckAction.CalculatedCost = CurrentAction.CalculatedCost + 1; // Set the new cost for the check action
 						CheckAction.UnSatisfiedConditions = CurrentAction.UnSatisfiedConditions; // Set the new set of unsat. conds. for the check action (inherited from current)
 						AppendMapNonDestructive(CheckAction.UnSatisfiedConditions, CheckAction.Preconditions); // Add the action's own preconditions back to the unsat. list
 						CheckAction.UnSatisfiedConditions.Remove(UnSatPair.Key); // Remove the unsat. cond. which we've just verified is satisfied by the check action
-						CheckAction.ParentActionID = CurrentActionID;
+						CheckAction.ParentActionID = CurrentAction.ActionID;
+						OpenSet.Add(CheckAction);
 					}
 				}
 			}
@@ -91,9 +112,9 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 
 		if (CheckConditionsAgainstWorldState(CurrentAction.UnSatisfiedConditions, WorldState))
 		{
-			if (CheckAndUpdateBestCost(CurrentActionID))
+			if (CheckAndUpdateBestCost(CurrentAction))
 			{
-				Plan = ReconstructPlan(CurrentActionID, GoalKey, GoalValue);
+				Plan = ReconstructPlan(CurrentAction.ActionID, ClosedSet, GoalKey, GoalValue);
 			}
 		}
 	}
@@ -101,20 +122,24 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	return Plan;
 }
 
-TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, FName GoalKey, bool GoalValue)
+TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, TArray<FAction> InActionSet, FName GoalKey, bool GoalValue)
 {
 	TArray<FAction> Plan = TArray<FAction>();
 
 	// Set CurrentActionID
 	FGuid CurrentActionID = FirstActionID;
 
-	// Add the parent action of action to the plan until CurrentActionID is the RootID, 
-	// indicating that we have reached the actions which produce the goal state and planning is done
 	while (CurrentActionID != RootID)
 	{
-		FAction CurrentAction = FetchActionFromCurrentSetByID(CurrentActionID);
-		Plan.Add(CurrentAction);
-		CurrentActionID = CurrentAction.ParentActionID;
+		for (FAction Action : InActionSet)
+		{
+			if (Action.ActionID == CurrentActionID)
+			{
+				Plan.Add(Action);
+				CurrentActionID = Action.ParentActionID;
+				break;
+			}
+		}
 	}
 
 	return Plan;
@@ -122,17 +147,18 @@ TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, FName Go
 
 FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID)
 {
-	for (FAction Action : CurrentActionSet)
+	static FAction ResultAction;
+	for (FAction& Action : CurrentActionSet)
 	{
 		if (Action.ActionID == ActionID)
 		{
-			return Action;
+			ResultAction = Action;
 		}
 	}
 	
 	UE_LOG(LogPlanner, Error, TEXT("No Action Found for given ActionID! Likely a fatal error!"));
 	
-	return FAction();
+	return ResultAction;
 }
 
 bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState)
@@ -152,13 +178,26 @@ bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TMap<FName, bool>
 	return true;
 }
 
-bool UPlannerSubsystem::CheckAndUpdateBestCost(FGuid ActionID)
+bool UPlannerSubsystem::CheckSingleConditionAgainstWorldState(FName ConditionKey, bool ConditionValue, const TMap<FName, bool>& InWorldState)
+{
+	if (!InWorldState.Contains(ConditionKey))
+	{
+		return false;
+	}
+	else if (ConditionValue != InWorldState[ConditionKey])
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+bool UPlannerSubsystem::CheckAndUpdateBestCost(FAction Action)
 {
 	// If the cost set by GeneratePlan so far is not less than the current best known cost, return without reconstructing a plan.
-	FAction CurrentAction = FetchActionFromCurrentSetByID(ActionID);
-	if (CurrentAction.Cost < BestCost)
+	if (Action.CalculatedCost < BestCost)
 	{
-		BestCost = CurrentAction.Cost;
+		BestCost = Action.CalculatedCost;
 		return true;
 	}
 	else
