@@ -8,6 +8,8 @@
 #include "PlannerAIController.h"
 #include "PocketWorldStateManager.generated.h"
 
+class AItemBase;
+class AFoodStashBase;
 
 UCLASS()
 class POCKET_API APocketWorldStateManager : public AActor, public IWorldStateManagerInterface
@@ -19,10 +21,44 @@ public:
 
 	virtual TMap<FName, bool> RequestWorldState_Implementation(APlannerAIController* Agent) override;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AItemBase> FoodClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AItemBase> PlowClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AItemBase> SeedsClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AItemBase> SoilClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AFoodStashBase> FoodStashClass;
+
 protected:
+
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+	// Level WorldState Values
+
+	UPROPERTY()
+	bool bFoodOnMap = false;
+
+	UPROPERTY()
+	bool bFoodIsDelivered = false;
+
+	UPROPERTY()
+	bool bPlowOnMap = false;
+
+	UPROPERTY()
+	bool bSoilOnMap = false;
+
+	UPROPERTY()
+	bool bSeedsOnMap = false;
+
+	UFUNCTION()
+	void UpdateLevelWorldStateValues();
+
 
 };
