@@ -17,6 +17,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	TArray<FAction> Plan = TArray<FAction>();
 	OpenSet.Empty();
 	ClosedSet.Empty();
+	BestCost = INT_MAX;
 
 	if (!IsValid(Agent))
 	{
@@ -35,7 +36,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	
 	CurrentActionSet = ActionSet; // Set global CurrentActionSet used by other methods in this class
 
-	RootID = FGuid::NewGuid(); // Set global RootID used to detect when actions adjacent to the goals state have been reached during plan reconstruction.
+	RootID = FGuid::NewGuid(); // Set global RootID used to detect when actions adjacent to the goal state have been reached during plan reconstruction.
 
 	// Start by finding all actions whose effects satisfy the goal state (GoalKey and GoalValue), add them to the open set, set their costs, unsat. conds., and parent IDs
 	for (FAction CheckAction : CurrentActionSet)
@@ -50,7 +51,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 
 			// Handle the case of a one step plan. 
 			// We don't want to return early in this case: Our heauristic functions (each step costs 1 + a satisfied condition is closer to the target) are currently very simple,
-			// but we may want to implement a more sophisticated cost/closeness function in the future, so it's worht checking the remaining open nodes for now.
+			// but we may want to implement a more sophisticated cost/closeness function in the future, so it's worth checking the remaining open nodes for now.
 			if (CheckConditionsAgainstWorldState(CheckAction.UnSatisfiedConditions, WorldState))
 			{
 				if (CheckAndUpdateBestCost(CheckAction))
@@ -61,15 +62,16 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		}
 	}
 
+	// While we have unexplored nodes which may lead back to the current worldstate
 	while (!OpenSet.IsEmpty())
 	{
 		FAction CurrentAction = OpenSet.Pop();
 		ClosedSet.Add(CurrentAction);
-		//FAction CurrentAction = FetchActionFromCurrentSetByID(CurrentActionID);
 
-		// Iterate over unsatisfied conditions stored on the current action (accumulate from previous actions explored on this path, I think)
+		// Iterate over unsatisfied conditions stored on the current action (accumulated from previous actions explored on this path)
 		for (auto UnSatPair : CurrentAction.UnSatisfiedConditions)
 		{
+			// If this particular precondition is satisfied by the worldstate, we don't need to explore actions which also satisfy it, continue instead
 			if (CheckSingleConditionAgainstWorldState(UnSatPair.Key, UnSatPair.Value, WorldState))
 			{
 				continue;
@@ -77,7 +79,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 			// Iterate over available actions
 			for (FAction CheckAction : CurrentActionSet)
 			{
-				// Check if the action satisfies any of our unsatisfied conditions.
+				// Check if the action satisfies the condition we're currently considering.
 				if (CheckAction.Effects.Contains(UnSatPair.Key) && CheckAction.Effects[UnSatPair.Key] == UnSatPair.Value)
 				{
 					//ToDo: This is where we might spawn a ContextCheckActor, or now that I think of it, call a more general Context Checker. Either way, ignoring that step for now
