@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "ItemBase.generated.h"
 
+class UStaticMeshComponent;
+
 UCLASS()
 class POCKET_API AItemBase : public AActor
 {
@@ -13,6 +15,12 @@ class POCKET_API AItemBase : public AActor
 	
 public:	
 	AItemBase();
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USceneComponent> DefaultRoot = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> StaticMesh = nullptr;
 
 protected:
 	virtual void BeginPlay() override;

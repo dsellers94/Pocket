@@ -3,12 +3,15 @@
 
 #include "NPCBase.h"
 #include "PlannerComponent.h"
+#include "Inventory/Inventorycomponent.h"
 
 ANPCBase::ANPCBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	PlannerComponent = CreateDefaultSubobject<UPlannerComponent>("PlannerComponent");
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>("InventoryComponent");
 }
 
 void ANPCBase::BeginPlay()

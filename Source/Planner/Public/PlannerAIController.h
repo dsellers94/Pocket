@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "PlannerStructs.h"
 #include "ActionSetData.h"
+#include "WorldStateManagerInterface.h"
 #include "PlannerAIController.generated.h"
 
 class UPlannerComponent;
@@ -17,6 +18,9 @@ class PLANNER_API APlannerAIController : public AAIController
 
 public: 
 
+	UPROPERTY(VisibleAnywhere)
+	TScriptInterface<IWorldStateManagerInterface> WorldStateManager;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TMap<FName, bool> WorldState = TMap<FName, bool>();
 
@@ -24,10 +28,17 @@ public:
 	void RequestPlan(FName GoalKey, bool GoalValue);
 
 	UFUNCTION(BlueprintCallable)
+	void RequestWorldState();
+
+	UFUNCTION(BlueprintCallable)
+	void ExecuteNextAction();
+
+	UFUNCTION(BlueprintCallable)
 	void PrintActionSet();
 
 	UFUNCTION(BlueprintCallable)
 	void PrintCurrentPlan();
+
 
 protected:
 
@@ -41,7 +52,13 @@ protected:
 	TObjectPtr<UPlannerComponent> ControlledPlannerComponent = nullptr;
 
 	UPROPERTY()
-	TArray<FAction> CurrentPlan;
+	TArray<FAction> CurrentPlan = TArray<FAction>();
+
+	UPROPERTY()
+	int CurrentActionCount = 0;
+
+	UPROPERTY()
+	int CurrentActionIndex = 0;
 
 
 protected:

@@ -7,6 +7,12 @@ AItemBase::AItemBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	DefaultRoot = CreateDefaultSubobject<USceneComponent>("Root");
+	SetRootComponent(DefaultRoot);
+
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
+	StaticMesh->SetupAttachment(DefaultRoot);
+
 }
 
 void AItemBase::BeginPlay()

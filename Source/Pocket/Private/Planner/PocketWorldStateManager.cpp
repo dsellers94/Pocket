@@ -4,6 +4,8 @@
 #include "Item/ItemBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item/FoodStashBase.h"
+#include "Pocket/Pocket.h"
+#include "Inventory/InventoryComponent.h"
 
 APocketWorldStateManager::APocketWorldStateManager()
 {
@@ -23,9 +25,34 @@ TMap<FName, bool> APocketWorldStateManager::RequestWorldState_Implementation(APl
 
 	UpdateLevelWorldStateValues();
 
-	// Access the Agent's controlled pawn and inventory component to set the individual worldstate value
+	if (!IsValid(Agent))
+	{
+		UE_LOG(LogPocket, Error, TEXT("Requesting Agent Invalid when requesting plan"));
+		return WorldState;
+	}
+	if (!IsValid(Agent->GetPawn()))
+	{
+		UE_LOG(LogPocket, Error, TEXT("Agent Pawn Invalid when requesting plan"));
+		return WorldState;
+	}
 
-	// Build the map out of all the worldstate values
+	UInventoryComponent* AgentInventory = Agent->GetPawn()->GetComponentByClass<UInventoryComponent>();
+
+	if (!IsValid(AgentInventory))
+	{
+		UE_LOG(LogPocket, Error, TEXT("Agent Pawn Invalid when requesting plan"));
+		return WorldState;
+	}
+
+	WorldState.Add(FName("kIsHoldingFood"), AgentInventory->HasItem(FoodClass));
+	WorldState.Add(FName("kIsHoldingPlow"), AgentInventory->HasItem(PlowClass));
+	WorldState.Add(FName("kIsHoldingSeeds"), AgentInventory->HasItem(SeedsClass));
+	WorldState.Add(FName("kFoodOnMap"),bFoodOnMap);
+	WorldState.Add(FName("kPlowOnMap"), bPlowOnMap);
+	WorldState.Add(FName("kSeedsOnMap"), bSeedsOnMap);
+	WorldState.Add(FName("kSoilOnMap"), bSoilOnMap);
+	WorldState.Add(FName("kFoodIsDelivered"), bFoodIsDelivered);
+
 
 	return WorldState;
 }

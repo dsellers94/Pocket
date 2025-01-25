@@ -7,6 +7,7 @@
 #include "NPCBase.generated.h"
 
 class UPlannerComponent;
+class UInventoryComponent;
 
 UCLASS()
 class POCKET_API ANPCBase : public APawn
@@ -18,6 +19,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlannerComponent> PlannerComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInventoryComponent> InventoryComponent = nullptr;
 
 protected:
 	virtual void BeginPlay() override;

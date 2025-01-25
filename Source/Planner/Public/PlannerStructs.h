@@ -6,6 +6,7 @@
 #include "PlannerStructs.generated.h"
 
 class AContextCheckActor;
+class AActionExecutionActor;
 
 USTRUCT(BlueprintType)
 struct FAction
@@ -42,6 +43,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftClassPtr<AActionExecutionActor> ActionExecutionActor = nullptr;
 
 	FString ToString() const;
 };

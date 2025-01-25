@@ -8,12 +8,34 @@
 #include "PlannerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlannerSubsystem.h"
+#include "WorldStateManagerInterface.h"
 
 
 void APlannerAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TArray<AActor*> Actors = TArray<AActor*>();
+
+	UGameplayStatics::GetAllActorsWithInterface(this, UWorldStateManagerInterface::StaticClass(), Actors);
+
+	if (Actors.Num() == 0)
+	{
+		UE_LOG(LogPlanner, Error, TEXT("No WorldStateManager found in level, likely a fatal error"));
+	}
+
+	if (Actors.IsValidIndex(0))
+	{
+		if (Actors[0]->GetClass()->ImplementsInterface(UWorldStateManagerInterface::StaticClass()))
+		{
+			WorldStateManager.SetObject(Actors[0]);
+		}
+	}
+
+	if (!IsValid(WorldStateManager.GetObject()))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Invalid WorldStateManager, likely a fatal error"));
+	}
 
 }
 
@@ -72,6 +94,25 @@ void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
 	}
 
 	CurrentPlan = PlannerSubsystem->GeneratePlan(this, ActionSet, WorldState, GoalKey, GoalValue);
+
+	CurrentActionCount = CurrentPlan.Num();
+
+	CurrentActionIndex = 0;
+
+	ExecuteNextAction();
+}
+
+void APlannerAIController::RequestWorldState()
+{
+	if (IsValid(WorldStateManager.GetObject()))
+	{
+		WorldState = IWorldStateManagerInterface::Execute_RequestWorldState(WorldStateManager.GetObject(), this);
+	}
+}
+
+void APlannerAIController::ExecuteNextAction()
+{
+
 }
 
 

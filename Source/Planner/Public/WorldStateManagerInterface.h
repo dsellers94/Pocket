@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "PlannerAIController.h"
 #include "WorldStateManagerInterface.generated.h"
+
+class APlannerAIController;
 
 UINTERFACE(MinimalAPI)
 class UWorldStateManagerInterface : public UInterface
