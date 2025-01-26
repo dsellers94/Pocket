@@ -10,6 +10,7 @@
 #include "PlannerAIController.generated.h"
 
 class UPlannerComponent;
+class AActionExecutionActor;
 
 UCLASS()
 class PLANNER_API APlannerAIController : public AAIController
@@ -32,6 +33,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ExecuteNextAction();
+
+	UFUNCTION(BlueprintCallable)
+	void GetNextGoal();
 
 	UFUNCTION(BlueprintCallable)
 	void PrintActionSet();
@@ -59,6 +63,15 @@ protected:
 
 	UPROPERTY()
 	int CurrentActionIndex = 0;
+
+	UPROPERTY()
+	TSoftClassPtr<AActionExecutionActor> SoftExecutionActor = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<AActionExecutionActor> CurrentExecutionActor = nullptr;
+
+	UFUNCTION()
+	void OnExecutionActorLoaded();
 
 
 protected:

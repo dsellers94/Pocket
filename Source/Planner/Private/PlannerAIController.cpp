@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PlannerSubsystem.h"
 #include "WorldStateManagerInterface.h"
+#include "ActionExecutionActor.h"
 
 
 void APlannerAIController::BeginPlay()
@@ -95,6 +96,13 @@ void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
 
 	CurrentPlan = PlannerSubsystem->GeneratePlan(this, ActionSet, WorldState, GoalKey, GoalValue);
 
+	if (CurrentPlan.Num() == 0)
+	{
+		UE_LOG(LogPlanner, Error, TEXT("No Plan Returned"));
+		GetNextGoal();
+		return;
+	}
+
 	CurrentActionCount = CurrentPlan.Num();
 
 	CurrentActionIndex = 0;
@@ -112,7 +120,54 @@ void APlannerAIController::RequestWorldState()
 
 void APlannerAIController::ExecuteNextAction()
 {
+	// Cleanup the last ActionExecutionActor if one exists
+	if (IsValid(CurrentExecutionActor))
+	{
+		CurrentExecutionActor->Destroy();
+	}
+	CurrentExecutionActor = nullptr;
 
+	if (!CurrentPlan.IsValidIndex(CurrentActionIndex))
+	{
+		UE_LOG(LogPlanner, Warning, TEXT("Plan Completed"));
+		return;
+	}
+	FAction CurrentAction = CurrentPlan[CurrentActionIndex];
+
+	SoftExecutionActor = CurrentAction.ActionExecutionActor;
+
+	FStreamableDelegate Delegate;
+	Delegate.BindUObject(this, &APlannerAIController::OnExecutionActorLoaded);
+	UAssetManager::GetStreamableManager()
+		.RequestAsyncLoad(SoftExecutionActor.ToSoftObjectPath(), Delegate);
+
+	CurrentActionIndex++; 
+}
+
+void APlannerAIController::GetNextGoal()
+{
+	UE_LOG(LogPlanner, Warning, TEXT("Getting Next Goal"));
+}
+
+void APlannerAIController::OnExecutionActorLoaded()
+{
+	UClass* ExecutionActorClass = SoftExecutionActor.Get();
+	AActor* Actor = GetWorld()->SpawnActor(ExecutionActorClass);
+	
+	if (!IsValid(Actor))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Failed to spawn ActionExecutionActor"));
+		return;
+	}
+
+	CurrentExecutionActor = Cast<AActionExecutionActor>(Actor);
+
+	CurrentExecutionActor->CallingAgent = this;
+	CurrentExecutionActor->OnActionComplete.AddDynamic(this, &APlannerAIController::ExecuteNextAction);
+	CurrentExecutionActor->OnActionFailed.AddDynamic(this, &APlannerAIController::GetNextGoal);
+	CurrentExecutionActor->Execute();
+
+	UAssetManager::GetStreamableManager().Unload(SoftExecutionActor.ToSoftObjectPath());
 }
 
 

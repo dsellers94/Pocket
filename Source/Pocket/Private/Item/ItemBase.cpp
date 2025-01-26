@@ -13,6 +13,7 @@ AItemBase::AItemBase()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	StaticMesh->SetupAttachment(DefaultRoot);
 
+	StaticMesh->SetCanEverAffectNavigation(false);
 }
 
 void AItemBase::BeginPlay()

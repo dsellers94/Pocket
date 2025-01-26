@@ -42,7 +42,7 @@ void AActionExecutionActor::DeclareActionComplete()
 	OnActionComplete.Broadcast();
 }
 
-void AActionExecutionActor::DeclareActioFailed()
+void AActionExecutionActor::DeclareActionFailed()
 {
 	OnActionFailed.Broadcast();
 }

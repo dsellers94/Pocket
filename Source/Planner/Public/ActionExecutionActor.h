@@ -25,7 +25,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnActionFailed OnActionFailed;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<APlannerAIController> CallingAgent = nullptr;
 
 	UFUNCTION()
@@ -40,7 +40,7 @@ public:
 	void DeclareActionComplete();
 
 	UFUNCTION(BlueprintCallable)
-	void DeclareActioFailed();
+	void DeclareActionFailed();
 
 
 protected:
