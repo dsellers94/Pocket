@@ -31,7 +31,7 @@ void UInventoryComponent::BeginPlay()
 FString FItem::ToString() const
 {
 	TStringBuilderWithBuffer<TCHAR, 256> StringBuilder;
-	StringBuilder.Append(TEXT("This will prevent item information eventually"));
+	StringBuilder.Append(TEXT("This will print item information eventually"));
 
 	FString Result = StringBuilder.ToString();
 	return Result;
