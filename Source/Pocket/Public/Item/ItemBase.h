@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Inventory/InventoryComponent.h"
 #include "ItemBase.generated.h"
 
 class UStaticMeshComponent;
@@ -21,6 +22,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMeshComponent> StaticMesh = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	FItem ItemData;
 
 protected:
 	virtual void BeginPlay() override;

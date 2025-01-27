@@ -29,7 +29,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AItemBase> ItemClass = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Quantity = 1;
+
 	FString ToString() const;
+};
+
+USTRUCT(BlueprintType)
+struct FItemRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ItemData")
+	FItem Item;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -44,8 +56,22 @@ public:
 	TArray<FItem> Items;
 
 	UFUNCTION(BlueprintCallable)
-	bool HasItem(TSubclassOf<AItemBase> ItemClass);
+	bool HasItemByClass(TSubclassOf<AItemBase> ItemClass);
 
+	UFUNCTION(BlueprintCallable)
+	bool HasItemByID(FGuid ItemID);
+
+	UFUNCTION(BlueprintCallable)
+	void AddItem(FItem InItem);
+
+	UFUNCTION(BlueprintCallable)
+	void AddItemByActor(AItemBase* ItemActor);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveItemByClass(TSubclassOf<AItemBase> ItemClass);
+
+	UFUNCTION(BlueprintCallable)
+	void PrintHeldItems();
 
 protected:
 	virtual void BeginPlay() override;

@@ -21,7 +21,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 
 	if (!IsValid(Agent))
 	{
-		UE_LOG(LogPlanner, Error, TEXT("Invalid Agent, likelyt a fatal error"));
+		UE_LOG(LogPlanner, Error, TEXT("Invalid Agent, likely a fatal error"));
 	}
 	if (ActionSet.Num() == 0)
 	{

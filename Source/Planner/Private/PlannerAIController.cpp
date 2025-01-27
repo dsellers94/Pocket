@@ -94,6 +94,7 @@ void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
 		return;
 	}
 
+	CurrentPlan.Empty();
 	CurrentPlan = PlannerSubsystem->GeneratePlan(this, ActionSet, WorldState, GoalKey, GoalValue);
 
 	if (CurrentPlan.Num() == 0)

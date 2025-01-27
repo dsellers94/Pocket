@@ -44,9 +44,9 @@ TMap<FName, bool> APocketWorldStateManager::RequestWorldState_Implementation(APl
 		return WorldState;
 	}
 
-	WorldState.Add(FName("kIsHoldingFood"), AgentInventory->HasItem(FoodClass));
-	WorldState.Add(FName("kIsHoldingPlow"), AgentInventory->HasItem(PlowClass));
-	WorldState.Add(FName("kIsHoldingSeeds"), AgentInventory->HasItem(SeedsClass));
+	WorldState.Add(FName("kIsHoldingFood"), AgentInventory->HasItemByClass(FoodClass));
+	WorldState.Add(FName("kIsHoldingPlow"), AgentInventory->HasItemByClass(PlowClass));
+	WorldState.Add(FName("kIsHoldingSeeds"), AgentInventory->HasItemByClass(SeedsClass));
 	WorldState.Add(FName("kFoodOnMap"),bFoodOnMap);
 	WorldState.Add(FName("kPlowOnMap"), bPlowOnMap);
 	WorldState.Add(FName("kSeedsOnMap"), bSeedsOnMap);
