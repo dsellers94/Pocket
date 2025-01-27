@@ -83,7 +83,8 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 				if (CheckAction.Effects.Contains(UnSatPair.Key) && CheckAction.Effects[UnSatPair.Key] == UnSatPair.Value)
 				{
 					//ToDo: This is where we might spawn a ContextCheckActor, or now that I think of it, call a more general Context Checker. Either way, ignoring that step for now
-					
+					// The context check actors could pull double duty: check if an action is possible and check if it is effective
+
 					// Handle the case of an action we've already closed (update cost and conditions if it would be less than the cost already stored on that action)
 					if (ClosedSet.Contains(CheckAction))
 					{
