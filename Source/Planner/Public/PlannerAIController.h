@@ -31,6 +31,9 @@ public:
 	UPROPERTY()
 	FGuid CurrentPlanID;
 
+	UPROPERTY(EditAnywhere, BlueprintreadOnly)
+	bool bSynchronousPlanningMode = false;
+
 	UFUNCTION()
 	void OnPlanningComplete(FGuid PlanID, TArray<FAction> Plan);
 

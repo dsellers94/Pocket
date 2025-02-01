@@ -96,10 +96,22 @@ void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
 
 	CurrentPlanID = FGuid::NewGuid();
 
-	PlannerSubsystem->RequestPlan(this, ActionSet, WorldState, GoalKey, GoalValue, CurrentPlanID);
+	if (bSynchronousPlanningMode)
+	{
+		TArray<FAction> NewPlan = PlannerSubsystem->GeneratePlan(
+			this,
+			ActionSet,
+			WorldState,
+			GoalKey,
+			GoalValue);
 
-	// Subscribe to PlannerSubsystem->OnPlanningComplete
-
+		OnPlanningComplete(CurrentPlanID, NewPlan);
+	}
+	else
+	{
+		PlannerSubsystem->RequestPlan(this, ActionSet, WorldState, GoalKey, GoalValue, CurrentPlanID);
+		PlannerSubsystem->OnPlanningComplete.AddDynamic(this, &ThisClass::OnPlanningComplete);
+	}
 }
 
 void APlannerAIController::OnPlanningComplete(FGuid PlanID, TArray<FAction> Plan)

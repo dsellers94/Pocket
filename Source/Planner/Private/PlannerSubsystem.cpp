@@ -1,7 +1,7 @@
 // Copyright Daniel Sellers 2024.
 
-
 #include "PlannerSubsystem.h"
+#include "Async/Async.h"
 
 void UPlannerSubsystem::RequestPlan(
 	APlannerAIController* Agent, 
@@ -11,6 +11,10 @@ void UPlannerSubsystem::RequestPlan(
 	bool GoalValue, 
 	FGuid PlanID)
 {
+	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, []()
+	{
+		
+	});
 	// This is where we will run an GeneratePlan() as an asyn task and return the result via OnPlanningComplete.Broadcast();
 }
 
