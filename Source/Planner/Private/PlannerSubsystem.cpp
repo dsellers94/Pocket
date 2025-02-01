@@ -3,6 +3,17 @@
 
 #include "PlannerSubsystem.h"
 
+void UPlannerSubsystem::RequestPlan(
+	APlannerAIController* Agent, 
+	const TArray<FAction>& ActionSet, 
+	TMap<FName, bool> WorldState, 
+	FName GoalKey, 
+	bool GoalValue, 
+	FGuid PlanID)
+{
+	// This is where we will run an GeneratePlan() as an asyn task and return the result via OnPlanningComplete.Broadcast();
+}
+
 // The goal is to convert this function to run in an async thread and have it broadcast an event with an FGuid parameter (or a specified agent?) to inform the requesting
 // agent that the plan is ready. For now we're just going to run it synchronously while I test and improve the algorithm. 
 // The requesting agent is a parameter because we may decide to load an actor from the TSoftClassPtr property to check some actions for validity given the game state,
@@ -33,6 +44,8 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		UE_LOG(LogPlanner, Error, TEXT("World State is empty, planning aborted"));
 		return Plan;
 	}
+
+	//TO DO: Handle the edge case where the plan already matches the worldstate?
 	
 	CurrentActionSet = ActionSet; // Set global CurrentActionSet used by other methods in this class
 

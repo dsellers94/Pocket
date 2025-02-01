@@ -94,8 +94,20 @@ void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
 		return;
 	}
 
+	CurrentPlanID = FGuid::NewGuid();
+
+	PlannerSubsystem->RequestPlan(this, ActionSet, WorldState, GoalKey, GoalValue, CurrentPlanID);
+
+	// Subscribe to PlannerSubsystem->OnPlanningComplete
+
+}
+
+void APlannerAIController::OnPlanningComplete(FGuid PlanID, TArray<FAction> Plan)
+{
+	if (PlanID != CurrentPlanID) return;
+
 	CurrentPlan.Empty();
-	CurrentPlan = PlannerSubsystem->GeneratePlan(this, ActionSet, WorldState, GoalKey, GoalValue);
+	CurrentPlan = Plan;
 
 	if (CurrentPlan.Num() == 0)
 	{

@@ -9,7 +9,7 @@
 #include "Planner/Planner.h"
 #include "PlannerSubsystem.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlanningComplete);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlanningComplete, FGuid, PlanID, TArray<FAction>, Plan);
 
 UCLASS()
 class PLANNER_API UPlannerSubsystem : public UGameInstanceSubsystem
@@ -20,6 +20,15 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlanningComplete OnPlanningComplete;
+
+	UFUNCTION()
+	void RequestPlan(
+		APlannerAIController* Agent,
+		const TArray<FAction>& ActionSet,
+		TMap<FName, bool> WorldState,
+		FName GoalKey,
+		bool GoalValue,
+		FGuid PlanID);
 	
 	UFUNCTION()
 	TArray<FAction> GeneratePlan(

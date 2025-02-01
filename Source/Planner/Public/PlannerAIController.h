@@ -28,6 +28,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestPlan(FName GoalKey, bool GoalValue);
 
+	UPROPERTY()
+	FGuid CurrentPlanID;
+
+	UFUNCTION()
+	void OnPlanningComplete(FGuid PlanID, TArray<FAction> Plan);
+
 	UFUNCTION(BlueprintCallable)
 	void RequestWorldState();
 
