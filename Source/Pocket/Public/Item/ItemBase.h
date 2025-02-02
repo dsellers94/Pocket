@@ -23,8 +23,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMeshComponent> StaticMesh = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	FItem ItemData;
+	UPROPERTY(EditDefaultsOnly)
+	FDataTableRowHandle ItemRow;
+
 
 protected:
 	virtual void BeginPlay() override;

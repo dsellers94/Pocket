@@ -41,29 +41,37 @@ bool UInventoryComponent::HasItemByID(FGuid ItemID)
 	return false;
 }
 
-void UInventoryComponent::AddItem(FItem InItem)
+void UInventoryComponent::AddItem(AItemBase* InItem)
 {
+	if (!IsValid(InItem))
+	{
+		UE_LOG(LogPocket, Error, TEXT("Invalid Item passed to AddItem"));
+		return;
+	}
+
+	const FDataTableRowHandle& ItemRow = InItem->ItemRow;
+
+	const FItemRow* FoundRow = ItemRow.GetRow<FItemRow>(__FUNCTION__);
+
+	if (FoundRow == nullptr)
+	{
+		UE_LOG(LogPocket, Error, TEXT("InventoryComponent: Failed to get Item data from Item Row Handle"));
+		return;
+	}
+	
+	FItem ItemData = FoundRow->Item;
+
 	for (FItem& Item : Items)
 	{
-		if (Item.ItemID == InItem.ItemID)
+		if (Item.ItemID == ItemData.ItemID)
 		{
 			Item.Quantity += 1;
 			return;
 		}
 	}
-	Items.Add(InItem);
+	Items.Add(ItemData);
 }
 
-
-void UInventoryComponent::AddItemByActor(AItemBase* ItemActor)
-{
-	if (!IsValid(ItemActor))
-	{
-		return;
-	}
-
-	Items.Add(ItemActor->ItemData);
-}
 
 void UInventoryComponent::RemoveItemByClass(TSubclassOf<AItemBase> ItemClass)
 {

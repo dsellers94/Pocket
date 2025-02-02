@@ -11,43 +11,9 @@
 
 ANPCBase::ANPCBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
 
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
-	SetRootComponent(CapsuleComponent);
-
-	DetectionSphere = CreateDefaultSubobject<USphereComponent>("DetectionSphere");
-	DetectionSphere->SetupAttachment(CapsuleComponent);
-
-	PlannerComponent = CreateDefaultSubobject<UPlannerComponent>("PlannerComponent");
-
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>("InventoryComponent");
-
-	PawnMovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>("PawnMovementComponent");
 }
 
-bool ANPCBase::AttemptItemPickup(TSubclassOf<AItemBase> ItemClass)
-{
-	if (!IsValid(InventoryComponent))
-	{
-		UE_LOG(LogPocket, Error, TEXT("InventoryComponent not valid"));
-		return false;
-	}
-
-	TArray<AActor*> Actors;
-	DetectionSphere->GetOverlappingActors(Actors, ItemClass.Get());
-
-	for (AActor* Actor : Actors)
-	{
-		if (Actor->GetClass() == ItemClass)
-		{
-			AItemBase* Item = Cast<AItemBase>(Actor);
-			InventoryComponent->AddItem(Item->ItemData);
-			return true;
-		}
-	}
-	return false;
-}
 
 void ANPCBase::BeginPlay()
 {

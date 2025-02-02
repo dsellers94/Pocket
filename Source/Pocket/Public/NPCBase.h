@@ -20,23 +20,6 @@ class POCKET_API ANPCBase : public APawn
 public:
 	ANPCBase();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UCapsuleComponent> CapsuleComponent = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USphereComponent> DetectionSphere = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UPlannerComponent> PlannerComponent = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UInventoryComponent> InventoryComponent = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UFloatingPawnMovement> PawnMovementComponent = nullptr;
-
-	UFUNCTION(BlueprintCallable)
-	bool AttemptItemPickup(TSubclassOf<AItemBase> ItemClass);
 
 protected:
 	virtual void BeginPlay() override;

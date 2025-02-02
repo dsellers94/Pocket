@@ -44,7 +44,7 @@ struct FItemRow : public FTableRowBase
 	FItem Item;
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class POCKET_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -62,10 +62,7 @@ public:
 	bool HasItemByID(FGuid ItemID);
 
 	UFUNCTION(BlueprintCallable)
-	void AddItem(FItem InItem);
-
-	UFUNCTION(BlueprintCallable)
-	void AddItemByActor(AItemBase* ItemActor);
+	void AddItem(AItemBase* InItem);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveItemByClass(TSubclassOf<AItemBase> ItemClass);

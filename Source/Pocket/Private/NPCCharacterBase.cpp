@@ -48,7 +48,7 @@ bool ANPCCharacterBase::AttemptItemPickup(TSubclassOf<AItemBase> ItemClass)
 		if (Actor->GetClass() == ItemClass)
 		{
 			AItemBase* Item = Cast<AItemBase>(Actor);
-			InventoryComponent->AddItem(Item->ItemData);
+			InventoryComponent->AddItem(Item);
 			return true;
 		}
 	}
