@@ -11,6 +11,7 @@
 
 class UPlannerComponent;
 class AActionExecutionActor;
+class UPlannerSubsystem;
 
 UCLASS()
 class PLANNER_API APlannerAIController : public AAIController
@@ -54,6 +55,9 @@ public:
 
 
 protected:
+
+	UPROPERTY()
+	TObjectPtr<UPlannerSubsystem> PlannerSubsystem = nullptr;
 
 	UPROPERTY()
 	TArray<FAction> ActionSet = TArray<FAction>();

@@ -58,6 +58,23 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 		return;
 	}
 
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld());
+	if (!IsValid(GameInstance))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Failed to get GameInstance while requesting plan"));
+		return;
+	}
+
+	PlannerSubsystem = GameInstance->GetSubsystem<UPlannerSubsystem>();
+
+	if (!IsValid(PlannerSubsystem))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Failed to get PlannerSubsystem on Possess"));
+		return;
+	}
+
+	PlannerSubsystem->OnPlanningComplete.AddDynamic(this, &ThisClass::OnPlanningComplete);
+
 	ActionRows = ControlledPlannerComponent->ActionRows;
 
 	GenerateActionSetFromRows();
@@ -78,16 +95,7 @@ void APlannerAIController::GenerateActionSetFromRows()
 }
 
 void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
-{
-	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(GetWorld());
-	if (!IsValid(GameInstance))
-	{
-		UE_LOG(LogPlanner, Error, TEXT("Failed to get GameInstance while requesting plan"));
-		return;
-	}
-	
-	UPlannerSubsystem* PlannerSubsystem = GameInstance->GetSubsystem<UPlannerSubsystem>();
-	
+{	
 	if (!IsValid(PlannerSubsystem))
 	{
 		UE_LOG(LogPlanner, Error, TEXT("Failed to get PlannerSubsystem while requesting plan"));
@@ -110,7 +118,6 @@ void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
 	else
 	{
 		PlannerSubsystem->RequestPlan(this, ActionSet, WorldState, GoalKey, GoalValue, CurrentPlanID);
-		PlannerSubsystem->OnPlanningComplete.AddDynamic(this, &ThisClass::OnPlanningComplete);
 	}
 }
 
