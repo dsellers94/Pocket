@@ -135,9 +135,10 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 				}
 			}
 		}
-		// NOTE: We may have a problem above with an action's preconditions overwriting any direct conflicts with the unsatisfied conditions which it has inherited from
-		// it's new parent action. If this becomes a problem before we decide to overhaul the precondition system we'll have to add some checks 
-		// and probably invalidate the new action if it conflicts with an existing unsat condition from the parent path.
+		// NOTE: We may have a problem above with an action added to the open set inheriting a set of preconditions from a parent
+		// who's inheritance later changes, therefore failing to pass a new precondition to the open node.
+		// Solution: Set the preconditions on a node when it is closed (explored) instead of when it opened (parent is explored)
+		// That way future updates to the closed node will maintain correct condition inheritance
 
 		if (CheckConditionsAgainstWorldState(CurrentAction.UnSatisfiedConditions, WorldState))
 		{
