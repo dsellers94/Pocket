@@ -37,9 +37,11 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	bool GoalValue)
 {
 	TArray<FAction> Plan = TArray<FAction>();
-	OpenSet.Empty();
-	ClosedSet.Empty();
-	BestCost = INT_MAX;
+	TArray<FAction> OpenSet = TArray<FAction>();
+	TArray<FAction> ClosedSet = TArray<FAction>();
+	TArray<FAction> CurrentActionSet = TArray<FAction>();
+	FGuid RootID = FGuid::NewGuid();
+	int BestCost = INT_MAX;
 
 	if (!IsValid(Agent))
 	{
@@ -78,9 +80,9 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 			// but we may want to implement a more sophisticated cost/closeness function in the future, so it's worth checking the remaining open nodes for now.
 			if (CheckConditionsAgainstWorldState(CheckAction.UnSatisfiedConditions, WorldState))
 			{
-				if (CheckAndUpdateBestCost(CheckAction))
+				if (CheckAndUpdateBestCost(CheckAction, BestCost))
 				{
-					Plan = ReconstructPlan(CheckActionID, OpenSet, GoalKey, GoalValue);
+					Plan = ReconstructPlan(CheckActionID, OpenSet, GoalKey, GoalValue, RootID);
 				}
 			}
 		}
@@ -139,9 +141,9 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 
 		if (CheckConditionsAgainstWorldState(CurrentAction.UnSatisfiedConditions, WorldState))
 		{
-			if (CheckAndUpdateBestCost(CurrentAction))
+			if (CheckAndUpdateBestCost(CurrentAction, BestCost))
 			{
-				Plan = ReconstructPlan(CurrentAction.ActionID, ClosedSet, GoalKey, GoalValue);
+				Plan = ReconstructPlan(CurrentAction.ActionID, ClosedSet, GoalKey, GoalValue, RootID);
 			}
 		}
 	}
@@ -149,7 +151,11 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	return Plan;
 }
 
-TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, TArray<FAction> InActionSet, FName GoalKey, bool GoalValue)
+TArray<FAction> UPlannerSubsystem::ReconstructPlan(
+	FGuid FirstActionID, 
+	TArray<FAction> InActionSet, 
+	FName GoalKey, bool GoalValue, 
+	FGuid RootID)
 {
 	TArray<FAction> Plan = TArray<FAction>();
 
@@ -172,7 +178,7 @@ TArray<FAction> UPlannerSubsystem::ReconstructPlan(FGuid FirstActionID, TArray<F
 	return Plan;
 }
 
-FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID)
+FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID, TArray<FAction>& CurrentActionSet)
 {
 	static FAction ResultAction;
 	for (FAction& Action : CurrentActionSet)
@@ -219,12 +225,12 @@ bool UPlannerSubsystem::CheckSingleConditionAgainstWorldState(FName ConditionKey
 	return true;
 }
 
-bool UPlannerSubsystem::CheckAndUpdateBestCost(FAction Action)
+bool UPlannerSubsystem::CheckAndUpdateBestCost(FAction Action, int& OutBestCost)
 {
 	// If the cost set by GeneratePlan so far is not less than the current best known cost, return without reconstructing a plan.
-	if (Action.CalculatedCost < BestCost)
+	if (Action.CalculatedCost < OutBestCost)
 	{
-		BestCost = Action.CalculatedCost;
+		OutBestCost = Action.CalculatedCost;
 		return true;
 	}
 	else

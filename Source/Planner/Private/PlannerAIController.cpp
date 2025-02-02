@@ -158,8 +158,8 @@ void APlannerAIController::ExecuteNextAction()
 		CurrentExecutionActor->Destroy();
 	}
 	CurrentExecutionActor = nullptr;
-
-	if (!CurrentPlan.IsValidIndex(CurrentActionIndex))
+	
+	if (CurrentActionIndex >= CurrentPlan.Num() || CurrentPlan.Num() == 0)
 	{
 		UE_LOG(LogPlanner, Warning, TEXT("Plan Completed"));
 		return;

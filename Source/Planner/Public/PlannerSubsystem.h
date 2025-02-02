@@ -40,26 +40,16 @@ public:
 
 private:
 
-	UPROPERTY()
-	TArray<FAction> CurrentActionSet;
-
-	UPROPERTY()
-	int BestCost = INT_MAX;
-
-	UPROPERTY()
-	FGuid RootID;
-
-	UPROPERTY()
-	TArray<FAction> OpenSet = TArray<FAction>();
-
-	UPROPERTY()
-	TArray<FAction> ClosedSet = TArray<FAction>();
+	UFUNCTION()
+	TArray<FAction> ReconstructPlan(
+		FGuid FirstActionID, 
+		TArray<FAction> InActionSet, 
+		FName GoalKey, 
+		bool GoalValue,
+		FGuid RootID);
 
 	UFUNCTION()
-	TArray<FAction> ReconstructPlan(FGuid FirstActionID, TArray<FAction> InActionSet, FName GoalKey, bool GoalValue);
-
-	UFUNCTION()
-	FAction FetchActionFromCurrentSetByID(FGuid ActionID);
+	FAction FetchActionFromCurrentSetByID(FGuid ActionID, TArray<FAction>& CurrentActionSet);
 
 	UFUNCTION()
 	bool CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState);
@@ -68,7 +58,7 @@ private:
 	bool CheckSingleConditionAgainstWorldState(FName ConditionKey, bool ConditionValue, const TMap<FName, bool>& InWorldState);
 
 	UFUNCTION()
-	bool CheckAndUpdateBestCost(FAction Action);
+	bool CheckAndUpdateBestCost(FAction Action, int& OutBestCost);
 
 	UFUNCTION()
 	void AppendMapNonDestructive(TMap<FName, bool>& TargetMap, TMap<FName, bool>& SourceMap);
