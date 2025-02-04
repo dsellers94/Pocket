@@ -100,22 +100,16 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		// (which are updated in the case that the parent's inheritance changes) and adds any conditions that are missing, unless this action's effects specifically 
 		// satisfy that condition. Obviously.
 		// this might still leave open the possibility of an action being added to the open set which is no longer needed, but I don't think this is a fatal problem.
+
 		if (CurrentAction.ParentActionID != RootID)
 		{
-			FAction ParentAction;
-			for (FAction ClosedAction : ClosedSet)
-			{
-				if (ClosedAction.ActionID == CurrentAction.ParentActionID)
-				{
-					ParentAction = ClosedAction;
-					break;
-				}
-			}
+			FAction ParentAction = FetchActionByID(CurrentAction.ParentActionID, ClosedSet);
+
 			for (auto InheritedPair : ParentAction.UnSatisfiedConditions)
 			{
 				if (!CurrentAction.UnSatisfiedConditions.Contains(InheritedPair.Key))
 				{
-					if (!CurrentAction.Effects.Contains(InheritedPair.Key) && CurrentAction.Effects[InheritedPair.Key] == InheritedPair.Value)
+					if (!(CurrentAction.Effects.Contains(InheritedPair.Key) && CurrentAction.Effects[InheritedPair.Key] == InheritedPair.Value))
 					{
 						CurrentAction.UnSatisfiedConditions.Add(InheritedPair.Key, InheritedPair.Value);
 					}
@@ -206,21 +200,21 @@ TArray<FAction> UPlannerSubsystem::ReconstructPlan(
 	return Plan;
 }
 
-//FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID, TArray<FAction>& CurrentActionSet)
-//{
-//	static FAction ResultAction;
-//	for (FAction& Action : CurrentActionSet)
-//	{
-//		if (Action.ActionID == ActionID)
-//		{
-//			ResultAction = Action;
-//		}
-//	}
-//	
-//	UE_LOG(LogPlanner, Error, TEXT("No Action Found for given ActionID! Likely a fatal error!"));
-//	
-//	return ResultAction;
-//}
+FAction UPlannerSubsystem::FetchActionByID(FGuid ActionID, TArray<FAction>& CurrentActionSet)
+{
+	FAction EmptyAction = FAction();
+	for (FAction Action : CurrentActionSet)
+	{
+		if (Action.ActionID == ActionID)
+		{
+			return Action;
+		}
+	}
+	
+	UE_LOG(LogPlanner, Error, TEXT("No Action Found for given ActionID! Likely a fatal error!"));
+
+	return EmptyAction;
+}
 
 bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState)
 {
