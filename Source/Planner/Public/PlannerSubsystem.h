@@ -48,8 +48,8 @@ private:
 		bool GoalValue,
 		FGuid RootID);
 
-	UFUNCTION()
-	FAction FetchActionFromCurrentSetByID(FGuid ActionID, TArray<FAction>& CurrentActionSet);
+	//UFUNCTION()
+	//FAction FetchActionFromCurrentSetByID(FGuid ActionID, TArray<FAction>& CurrentActionSet);
 
 	UFUNCTION()
 	bool CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState);

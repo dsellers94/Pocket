@@ -91,7 +91,38 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	// While we have unexplored nodes which may lead back to the current worldstate
 	while (!OpenSet.IsEmpty())
 	{
+		// Get the next action to explore from the open set
 		FAction CurrentAction = OpenSet.Pop();
+
+		// This entire block is to handle one edge case until I think of a better solution:
+		// It's possible that a node is added to the open set and inherits unsatisfied conditions from a parent node whose inheritance, and therefore
+		// inherited unsatisfied conditions, is later changed. This block checks the current action's unsatisfied conditions against the parent's unsatisfied conditions,
+		// (which are updated in the case that the parent's inheritance changes) and adds any conditions that are missing, unless this action's effects specifically 
+		// satisfy that condition. Obviously.
+		// this might still leave open the possibility of an action being added to the open set which is no longer needed, but I don't think this is a fatal problem.
+		if (CurrentAction.ParentActionID != RootID)
+		{
+			FAction ParentAction;
+			for (FAction ClosedAction : ClosedSet)
+			{
+				if (ClosedAction.ActionID == CurrentAction.ParentActionID)
+				{
+					ParentAction = ClosedAction;
+					break;
+				}
+			}
+			for (auto InheritedPair : ParentAction.UnSatisfiedConditions)
+			{
+				if (!CurrentAction.UnSatisfiedConditions.Contains(InheritedPair.Key))
+				{
+					if (!CurrentAction.Effects.Contains(InheritedPair.Key) && CurrentAction.Effects[InheritedPair.Key] == InheritedPair.Value)
+					{
+						CurrentAction.UnSatisfiedConditions.Add(InheritedPair.Key, InheritedPair.Value);
+					}
+				}
+			}
+		}
+
 		ClosedSet.Add(CurrentAction);
 
 		// Iterate over unsatisfied conditions stored on the current action (accumulated from previous actions explored on this path)
@@ -135,10 +166,6 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 				}
 			}
 		}
-		// NOTE: We may have a problem above with an action added to the open set inheriting a set of preconditions from a parent
-		// who's inheritance later changes, therefore failing to pass a new precondition to the open node.
-		// Solution: Set the preconditions on a node when it is closed (explored) instead of when it opened (parent is explored)
-		// That way future updates to the closed node will maintain correct condition inheritance
 
 		if (CheckConditionsAgainstWorldState(CurrentAction.UnSatisfiedConditions, WorldState))
 		{
@@ -179,21 +206,21 @@ TArray<FAction> UPlannerSubsystem::ReconstructPlan(
 	return Plan;
 }
 
-FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID, TArray<FAction>& CurrentActionSet)
-{
-	static FAction ResultAction;
-	for (FAction& Action : CurrentActionSet)
-	{
-		if (Action.ActionID == ActionID)
-		{
-			ResultAction = Action;
-		}
-	}
-	
-	UE_LOG(LogPlanner, Error, TEXT("No Action Found for given ActionID! Likely a fatal error!"));
-	
-	return ResultAction;
-}
+//FAction UPlannerSubsystem::FetchActionFromCurrentSetByID(FGuid ActionID, TArray<FAction>& CurrentActionSet)
+//{
+//	static FAction ResultAction;
+//	for (FAction& Action : CurrentActionSet)
+//	{
+//		if (Action.ActionID == ActionID)
+//		{
+//			ResultAction = Action;
+//		}
+//	}
+//	
+//	UE_LOG(LogPlanner, Error, TEXT("No Action Found for given ActionID! Likely a fatal error!"));
+//	
+//	return ResultAction;
+//}
 
 bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState)
 {
