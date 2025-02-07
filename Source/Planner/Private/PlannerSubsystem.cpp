@@ -70,7 +70,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		FGuid CheckActionID = CheckAction.ActionID;
 		if (CheckAction.Effects.Contains(GoalKey) && CheckAction.Effects[GoalKey] == GoalValue)
 		{
-			CheckAction.CalculatedCost = 1;
+			CheckAction.CalculatedCost = CheckAction.ActionCost;
 			CheckAction.UnSatisfiedConditions = CheckAction.Preconditions;
 			CheckAction.ParentActionID = RootID;
 			OpenSet.Add(CheckAction);
@@ -94,27 +94,34 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		// Get the next action to explore from the open set
 		FAction CurrentAction = OpenSet.Pop();
 
-		// This entire block is to handle one edge case until I think of a better solution:
+
 		// It's possible that a node is added to the open set and inherits unsatisfied conditions from a parent node whose inheritance, and therefore
 		// inherited unsatisfied conditions, is later changed. This block checks the current action's unsatisfied conditions against the parent's unsatisfied conditions,
 		// (which are updated in the case that the parent's inheritance changes) and adds any conditions that are missing, unless this action's effects specifically 
 		// satisfy that condition. Obviously.
-		// this might still leave open the possibility of an action being added to the open set which is no longer needed, but I don't think this is a fatal problem.
-
+		// This might still leave open the possibility of an action being added to the open set which is no longer needed, but I don't think this is a fatal problem.
+		// This is also where we'll calculate a node's cost before closing it, to ensure it's calculated from the parent correctly
 		if (CurrentAction.ParentActionID != RootID)
 		{
 			FAction ParentAction = FetchActionByID(CurrentAction.ParentActionID, ClosedSet);
+			
+			CurrentAction.CalculatedCost = ParentAction.CalculatedCost + CurrentAction.ActionCost; // Set the new cost for the current action
 
+			// Iterate over the parent action's unsat. conds
 			for (auto InheritedPair : ParentAction.UnSatisfiedConditions)
 			{
+				// if this action does not already contain a certain condition
 				if (!CurrentAction.UnSatisfiedConditions.Contains(InheritedPair.Key))
 				{
+					// add the missing condition to this actions unsat. conds, as long as this action's effects don't satisfy it 
+					// (we know this action satisfies at least one of it's parents unsat. conds, or it wouldn't have been added to the open set by that parent
 					if (!(CurrentAction.Effects.Contains(InheritedPair.Key) && CurrentAction.Effects[InheritedPair.Key] == InheritedPair.Value))
 					{
 						CurrentAction.UnSatisfiedConditions.Add(InheritedPair.Key, InheritedPair.Value);
 					}
 				}
 			}
+			AppendMapNonDestructive(CurrentAction.UnSatisfiedConditions, CurrentAction.Preconditions); //Append this action's own preconditions to the unsat. conds. list
 		}
 
 		ClosedSet.Add(CurrentAction);
@@ -139,9 +146,9 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 					// Handle the case of an action we've already closed (update cost and conditions if it would be less than the cost already stored on that action)
 					if (ClosedSet.Contains(CheckAction))
 					{
-						if (CurrentAction.CalculatedCost + 1 < CheckAction.CalculatedCost)
+						if (CurrentAction.CalculatedCost + CheckAction.ActionCost < CheckAction.CalculatedCost)
 						{
-							CheckAction.CalculatedCost = CurrentAction.CalculatedCost + 1; // Set the new cost for the check action
+							CheckAction.CalculatedCost = CurrentAction.CalculatedCost + CheckAction.ActionCost; // Set the new cost for the check action
 							CheckAction.ParentActionID = CurrentAction.ActionID;
 							CheckAction.UnSatisfiedConditions = CurrentAction.UnSatisfiedConditions; // Set the new set of unsat. conds. for the check action (inherited from current)
 							AppendMapNonDestructive(CheckAction.UnSatisfiedConditions, CheckAction.Preconditions); // Add the action's own preconditions back to the unsat. list
@@ -149,11 +156,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 						}
 					}
 					else
-					{
-						CheckAction.CalculatedCost = CurrentAction.CalculatedCost + 1; // Set the new cost for the check action
-						CheckAction.UnSatisfiedConditions = CurrentAction.UnSatisfiedConditions; // Set the new set of unsat. conds. for the check action (inherited from current)
-						AppendMapNonDestructive(CheckAction.UnSatisfiedConditions, CheckAction.Preconditions); // Add the action's own preconditions back to the unsat. list
-						CheckAction.UnSatisfiedConditions.Remove(UnSatPair.Key); // Remove the unsat. cond. which we've just verified is satisfied by the check action
+					{						
 						CheckAction.ParentActionID = CurrentAction.ActionID;
 						OpenSet.Add(CheckAction);
 					}

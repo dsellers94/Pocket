@@ -179,6 +179,7 @@ void APlannerAIController::ExecuteNextAction()
 void APlannerAIController::GetNextGoal()
 {
 	UE_LOG(LogPlanner, Warning, TEXT("Getting Next Goal"));
+	OnGettingNextGoal.Broadcast();
 }
 
 void APlannerAIController::OnExecutionActorLoaded()

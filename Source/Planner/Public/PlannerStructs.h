@@ -38,6 +38,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	int CalculatedCost = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int ActionCost = 1;
+
 	UPROPERTY()
 	TMap<FName, bool> UnSatisfiedConditions;
 

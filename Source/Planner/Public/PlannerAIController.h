@@ -9,6 +9,8 @@
 #include "WorldStateManagerInterface.h"
 #include "PlannerAIController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGettingNextGoal);
+
 class UPlannerComponent;
 class AActionExecutionActor;
 class UPlannerSubsystem;
@@ -19,6 +21,9 @@ class PLANNER_API APlannerAIController : public AAIController
 	GENERATED_BODY()
 
 public: 
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGettingNextGoal OnGettingNextGoal;
 
 	UPROPERTY(VisibleAnywhere)
 	TScriptInterface<IWorldStateManagerInterface> WorldStateManager;
