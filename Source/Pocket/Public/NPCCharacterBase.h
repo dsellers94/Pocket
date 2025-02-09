@@ -9,6 +9,7 @@
 class UPlannerComponent;
 class UInventoryComponent;
 class USphereComponent;
+class UBehaviorTree;
 
 UCLASS()
 class POCKET_API ANPCCharacterBase : public ACharacter
@@ -26,6 +27,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInventoryComponent> InventoryComponent = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBehaviorTree> BehaviorTree = nullptr;
 
 	UFUNCTION(BlueprintCallable)
 	bool AttemptItemPickup(TSubclassOf<AItemBase> ItemClass);

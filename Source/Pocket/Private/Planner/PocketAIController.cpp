@@ -4,10 +4,21 @@
 #include "Planner/PocketAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "NPCCharacterBase.h"
 #include "Pocket/Pocket.h"
 
 void APocketAIController::BeginPlay()
 {
+	Super::BeginPlay();
+
+	ControlledNPC = Cast<ANPCCharacterBase>(GetPawn());
+	if (!IsValid(ControlledNPC))
+	{
+		UE_LOG(LogPocket, Error, TEXT("Failed to get Controlled NPC"));
+		return;
+	}
+	BehaviorTree = ControlledNPC->BehaviorTree;
+
 	if (!IsValid(BehaviorTree))
 	{
 		UE_LOG(LogPocket, Error, TEXT("No valid behavior tree found"));
@@ -21,6 +32,15 @@ void APocketAIController::BeginPlay()
 		return;
 	}
 	OnGettingNextGoal.AddDynamic(this, &ThisClass::SetGetNextGoalFlag);
+
+	GetWorldTimerManager().SetTimer(
+		InfoUpdateTimerHandle,
+		this,
+		&ThisClass::UpdateInfo,
+		InfoUpdateTime,
+		true);
+
+	SetGetNextGoalFlag();
 }
 
 void APocketAIController::SetGetNextGoalFlag()
@@ -29,5 +49,17 @@ void APocketAIController::SetGetNextGoalFlag()
 	{
 		BlackboardComponent->SetValueAsBool("GettingNextGoal", true);
 	}
+}
+
+void APocketAIController::RemoveSetNextGoalFlag()
+{
+	if (IsValid(BlackboardComponent))
+	{
+		BlackboardComponent->SetValueAsBool("GettingNextGoal", false);
+	}
+}
+
+void APocketAIController::UpdateInfo()
+{
 }
 

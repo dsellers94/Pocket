@@ -102,9 +102,6 @@ protected:
 	UFUNCTION()
 	void GenerateActionSetFromRows();
 
-
-private:
-
 	virtual void BeginPlay() override;
 	
 };

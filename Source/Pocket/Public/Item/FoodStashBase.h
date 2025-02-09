@@ -6,9 +6,8 @@
 #include "Item/ItemBase.h"
 #include "FoodStashBase.generated.h"
 
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatusChanged);
+
 UCLASS()
 class POCKET_API AFoodStashBase : public AItemBase
 {
@@ -16,8 +15,29 @@ class POCKET_API AFoodStashBase : public AItemBase
 
 public:
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintAssignable)
+	FOnStatusChanged OnStatusChanged;
+
+	UPROPERTY(BlueprintReadOnly)
 	bool StashOccupied = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ConsumeFoodTime = 15.f;
+
+	UFUNCTION(BlueprintCallable)
+	void DeliverFood();
+
+	UFUNCTION(BlueprintCallable)
+	void ConsumeFood();
+
+protected:
+
+	UPROPERTY()
+	FTimerHandle ConsumeFoodTimerHandle;
+
+private:
+
+	virtual void BeginPlay() override;
 
 	
 };

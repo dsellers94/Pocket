@@ -20,7 +20,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USceneComponent> DefaultRoot = nullptr;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UStaticMeshComponent> StaticMesh = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
