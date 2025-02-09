@@ -182,6 +182,14 @@ void APlannerAIController::GetNextGoal()
 	OnGettingNextGoal.Broadcast();
 }
 
+void APlannerAIController::CancelPlan()
+{
+	if (IsValid(CurrentExecutionActor))
+	{
+		CurrentExecutionActor->DeclareActionFailed();
+	}
+}
+
 void APlannerAIController::OnExecutionActorLoaded()
 {
 	UClass* ExecutionActorClass = SoftExecutionActor.Get();

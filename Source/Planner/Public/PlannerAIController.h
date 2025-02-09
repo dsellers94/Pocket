@@ -53,6 +53,9 @@ public:
 	void GetNextGoal();
 
 	UFUNCTION(BlueprintCallable)
+	void CancelPlan();
+
+	UFUNCTION(BlueprintCallable)
 	void PrintActionSet();
 
 	UFUNCTION(BlueprintCallable)
@@ -98,6 +101,7 @@ protected:
 
 	UFUNCTION()
 	void GenerateActionSetFromRows();
+
 
 private:
 
