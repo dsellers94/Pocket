@@ -162,6 +162,7 @@ void APlannerAIController::ExecuteNextAction()
 	if (CurrentActionIndex >= CurrentPlan.Num() || CurrentPlan.Num() == 0)
 	{
 		UE_LOG(LogPlanner, Warning, TEXT("Plan Completed"));
+		GetNextGoal();
 		return;
 	}
 	FAction CurrentAction = CurrentPlan[CurrentActionIndex];

@@ -51,7 +51,7 @@ void APocketAIController::SetGetNextGoalFlag()
 	}
 }
 
-void APocketAIController::RemoveSetNextGoalFlag()
+void APocketAIController::RemoveGetNextGoalFlag()
 {
 	if (IsValid(BlackboardComponent))
 	{

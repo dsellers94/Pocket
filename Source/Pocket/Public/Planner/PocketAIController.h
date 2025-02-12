@@ -24,7 +24,7 @@ public:
 	void SetGetNextGoalFlag();
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveSetNextGoalFlag();
+	void RemoveGetNextGoalFlag();
 
 	UPROPERTY(EditAnywhere)
 	float InfoUpdateTime = 0.1;
@@ -37,13 +37,13 @@ protected:
 	UFUNCTION()
 	virtual void UpdateInfo();
 
-private:
-
 	UPROPERTY()
 	TObjectPtr<UBehaviorTree> BehaviorTree = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UBlackboardComponent> BlackboardComponent = nullptr;
+
+private:
 
 	virtual void BeginPlay() override;
 	

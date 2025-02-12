@@ -6,9 +6,6 @@
 #include "Planner/PocketAIController.h"
 #include "FarmerAIController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class POCKET_API AFarmerAIController : public APocketAIController
 {
@@ -17,5 +14,6 @@ class POCKET_API AFarmerAIController : public APocketAIController
 public:
 
 	virtual void UpdateInfo() override;
+
 	
 };
