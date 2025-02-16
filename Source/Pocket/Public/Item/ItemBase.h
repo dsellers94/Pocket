@@ -26,6 +26,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	FDataTableRowHandle ItemRow;
 
+	//virtual void BeginDestroy() override;
+
 
 protected:
 	virtual void BeginPlay() override;

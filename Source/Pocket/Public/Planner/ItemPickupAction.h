@@ -35,5 +35,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void FinishItemPickup();
+
+protected:
+
+	UFUNCTION()
+	void OnTargetItemDestroyed(AActor* DestroyedItem);
 	
 };

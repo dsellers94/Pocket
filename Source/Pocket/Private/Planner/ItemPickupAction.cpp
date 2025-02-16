@@ -46,6 +46,7 @@ void AItemPickupAction::Execute_Implementation()
 
 	if (IsValid(ClosestItem))
 	{
+		ClosestItem->OnDestroyed.AddDynamic(this, &ThisClass::OnTargetItemDestroyed);
 		StartMovement(ClosestItem);
 	}
 }
@@ -61,4 +62,9 @@ void AItemPickupAction::FinishItemPickup()
 	{
 		DeclareActionFailed();
 	}
+}
+
+void AItemPickupAction::OnTargetItemDestroyed(AActor* DestroyedItem)
+{
+	DeclareActionFailed();
 }
