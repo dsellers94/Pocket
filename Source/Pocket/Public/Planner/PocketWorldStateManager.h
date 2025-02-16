@@ -55,6 +55,12 @@ protected:
 	bool bSoilOnMap = false;
 
 	UPROPERTY()
+	bool bSoilIsAvailable = false;
+
+	UPROPERTY()
+	bool bFoodIsGrowing = false;
+
+	UPROPERTY()
 	bool bSeedsOnMap = false;
 
 	UFUNCTION()

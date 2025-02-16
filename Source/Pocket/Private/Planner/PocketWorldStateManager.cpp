@@ -4,6 +4,7 @@
 #include "Item/ItemBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item/FoodStashBase.h"
+#include "Item/SoilBase.h"
 #include "Pocket/Pocket.h"
 #include "Inventory/InventoryComponent.h"
 
@@ -51,6 +52,7 @@ TMap<FName, bool> APocketWorldStateManager::RequestWorldState_Implementation(APl
 	WorldState.Add(FName("kPlowOnMap"), bPlowOnMap);
 	WorldState.Add(FName("kSeedsOnMap"), bSeedsOnMap);
 	WorldState.Add(FName("kSoilOnMap"), bSoilOnMap);
+	WorldState.Add(FName("kSoilIsAvailable"), bSoilIsAvailable);
 	WorldState.Add(FName("kFoodIsDelivered"), bFoodIsDelivered);
 
 
@@ -65,14 +67,36 @@ void APocketWorldStateManager::UpdateLevelWorldStateValues()
 	UGameplayStatics::GetAllActorsOfClass(this, FoodClass, Actors);
 	bFoodOnMap = Actors.Num() > 0;
 	Actors.Empty();
+
 	// Set bPlowOnMap
 	UGameplayStatics::GetAllActorsOfClass(this, PlowClass, Actors);
 	bPlowOnMap = Actors.Num() > 0;
 	Actors.Empty();
-	// Set bSoilOnMap
+
+	// Set bSoilIsAvailable & bSoilOnMap & bFoodIsGrowing
 	UGameplayStatics::GetAllActorsOfClass(this, SoilClass, Actors);
+	bSoilIsAvailable = false;
+	bFoodIsGrowing = false;
+	for (AActor* Actor : Actors)
+	{
+		ASoilBase* Soil = Cast<ASoilBase>(Actor);
+		if (Soil->IsGrowingFood)
+		{
+			bFoodIsGrowing = true;
+		}
+		else
+		{
+			bSoilIsAvailable = true;
+		}
+	}
+	if (Actors.Num() <= 0)
+	{
+		bSoilIsAvailable = false;
+		bFoodIsGrowing = false;
+	}
 	bSoilOnMap = Actors.Num() > 0;
 	Actors.Empty();
+
 	// Set bSeedsOnMap
 	UGameplayStatics::GetAllActorsOfClass(this, SeedsClass, Actors);
 	bSeedsOnMap = Actors.Num() > 0;
@@ -89,5 +113,6 @@ void APocketWorldStateManager::UpdateLevelWorldStateValues()
 			break;
 		}
 	}
+	Actors.Empty();
 
 }
