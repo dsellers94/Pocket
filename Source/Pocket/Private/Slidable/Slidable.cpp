@@ -79,12 +79,21 @@ void ASlidable::Interact_Implementation(FVector InteractionPoint)
 		UE_LOG(LogTemp, Warning, TEXT("Sliding Forward"));
 		SlidingDirection = GetActorForwardVector();
 	}
-
 }
 
 void ASlidable::StopInteracting_Implementation()
 {
 	bIsSliding = false;
 	UE_LOG(LogTemp, Warning, TEXT("Slidable: I'll just stop right here"));
+}
+
+void ASlidable::ReactToCursorFocus_Implementation()
+{
+	StaticMesh->SetRenderCustomDepth(true);
+}
+
+void ASlidable::StopReactingToCursorFocus_Implementation()
+{
+	StaticMesh->SetRenderCustomDepth(false);
 }
 

@@ -34,6 +34,10 @@ public:
 
 	virtual void StopInteracting_Implementation() override;
 
+	virtual void ReactToCursorFocus_Implementation() override;
+
+	virtual void StopReactingToCursorFocus_Implementation() override;
+
 
 protected:
 	virtual void BeginPlay() override;

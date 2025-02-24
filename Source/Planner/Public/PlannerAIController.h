@@ -56,6 +56,9 @@ public:
 	void CancelPlan();
 
 	UFUNCTION(BlueprintCallable)
+	void OnActionFailed();
+
+	UFUNCTION(BlueprintCallable)
 	void PrintActionSet();
 
 	UFUNCTION(BlueprintCallable)

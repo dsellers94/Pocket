@@ -45,10 +45,23 @@ void APocketPlayer::CursorTrace()
 	if (ActorUnderCursor && ActorUnderCursor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
 	{
 		CurrentInteractable.SetObject(ActorUnderCursor);
+		
+		if (CurrentInteractable.GetObject())
+		{
+			UObject* InteractionObject = CurrentInteractable.GetObject();
+			IInteractInterface::Execute_ReactToCursorFocus(InteractionObject);
+		}
 	}
 	else
 	{
-		if (CurrentInteractable.GetObject()) LastInteractable = CurrentInteractable;
+		if (CurrentInteractable.GetObject())
+		{
+			LastInteractable = CurrentInteractable;
+
+			UObject* InteractionObject = CurrentInteractable.GetObject();
+			IInteractInterface::Execute_StopReactingToCursorFocus(InteractionObject);
+		}
+
 		CurrentInteractable.SetObject(nullptr);
 	}
 }

@@ -28,5 +28,11 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void StopInteracting();
 
+	UFUNCTION(BlueprintNativeEvent)
+	void ReactToCursorFocus();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void StopReactingToCursorFocus();
+
 
 };

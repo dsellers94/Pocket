@@ -55,8 +55,8 @@ void AItemPickupAction::FinishItemPickup()
 {
 	if (ControlledCharacter->AttemptItemPickup(ItemClass))
 	{
-		ClosestItem->Destroy();
 		DeclareActionComplete();
+		ClosestItem->Destroy();
 	}
 	else
 	{

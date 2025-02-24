@@ -191,6 +191,7 @@ void APlannerAIController::CancelPlan()
 	}
 }
 
+
 void APlannerAIController::OnExecutionActorLoaded()
 {
 	UClass* ExecutionActorClass = SoftExecutionActor.Get();
@@ -206,10 +207,20 @@ void APlannerAIController::OnExecutionActorLoaded()
 
 	CurrentExecutionActor->CallingAgent = this;
 	CurrentExecutionActor->OnActionComplete.AddDynamic(this, &APlannerAIController::ExecuteNextAction);
-	CurrentExecutionActor->OnActionFailed.AddDynamic(this, &APlannerAIController::GetNextGoal);
+	CurrentExecutionActor->OnActionFailed.AddDynamic(this, &APlannerAIController::OnActionFailed);
 	CurrentExecutionActor->Execute();
 
 	UAssetManager::GetStreamableManager().Unload(SoftExecutionActor.ToSoftObjectPath());
+}
+
+void APlannerAIController::OnActionFailed()
+{
+	if (IsValid(CurrentExecutionActor))
+	{
+		CurrentExecutionActor->Destroy();
+	}
+	CurrentExecutionActor = nullptr;
+	GetNextGoal();
 }
 
 
