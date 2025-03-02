@@ -95,5 +95,6 @@ void ASlidable::ReactToCursorFocus_Implementation()
 void ASlidable::StopReactingToCursorFocus_Implementation()
 {
 	StaticMesh->SetRenderCustomDepth(false);
+	bIsSliding = false;
 }
 
