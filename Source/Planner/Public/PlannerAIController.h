@@ -29,10 +29,10 @@ public:
 	TScriptInterface<IWorldStateManagerInterface> WorldStateManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TMap<FName, bool> WorldState = TMap<FName, bool>();
+	TArray<FWorldStatePair> WorldState = TArray<FWorldStatePair>();
 
 	UFUNCTION(BlueprintCallable)
-	void RequestPlan(FName GoalKey, bool GoalValue);
+	void RequestPlan(FWorldStatePair GoalState);
 
 	UPROPERTY()
 	FGuid CurrentPlanID;

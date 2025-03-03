@@ -6,9 +6,8 @@
 void UPlannerSubsystem::RequestPlan(
 	APlannerAIController* Agent, 
 	const TArray<FAction>& ActionSet, 
-	TMap<FName, bool> WorldState, 
-	FName GoalKey, 
-	bool GoalValue, 
+	TArray<FWorldStatePair> WorldState,
+	FWorldStatePair GoalState, 
 	FGuid PlanID)
 {
 	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, 
@@ -16,11 +15,10 @@ void UPlannerSubsystem::RequestPlan(
 		Agent, 
 		ActionSet, 
 		WorldState, 
-		GoalKey, 
-		GoalValue, 
+		GoalState, 
 		PlanID]()
 	{
-		TArray<FAction> GeneratedPlan = GeneratePlan(Agent, ActionSet, WorldState, GoalKey, GoalValue);
+		TArray<FAction> GeneratedPlan = GeneratePlan(Agent, ActionSet, WorldState, GoalState);
 
 		AsyncTask(ENamedThreads::GameThread, [this, PlanID, GeneratedPlan]()
 		{
@@ -32,9 +30,8 @@ void UPlannerSubsystem::RequestPlan(
 TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	APlannerAIController* Agent, 
 	const TArray<FAction>& ActionSet,
-	TMap<FName, bool> WorldState, 
-	FName GoalKey,
-	bool GoalValue)
+	TArray<FWorldStatePair> WorldState,
+	FWorldStatePair GoalState)
 {
 	TArray<FAction> Plan = TArray<FAction>();
 	TArray<FAction> OpenSet = TArray<FAction>();
@@ -68,7 +65,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 	for (FAction CheckAction : CurrentActionSet)
 	{
 		FGuid CheckActionID = CheckAction.ActionID;
-		if (CheckAction.Effects.Contains(GoalKey) && CheckAction.Effects[GoalKey] == GoalValue)
+		if (CheckAction.EffectsSatisfyCondition(GoalState))
 		{
 			CheckAction.CalculatedCost = CheckAction.ActionCost;
 			CheckAction.UnSatisfiedConditions = CheckAction.Preconditions;
@@ -82,7 +79,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 			{
 				if (CheckAndUpdateBestCost(CheckAction, BestCost))
 				{
-					Plan = ReconstructPlan(CheckActionID, OpenSet, GoalKey, GoalValue, RootID);
+					Plan = ReconstructPlan(CheckActionID, OpenSet, GoalState, RootID);
 				}
 			}
 		}
@@ -108,16 +105,16 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 			CurrentAction.CalculatedCost = ParentAction.CalculatedCost + CurrentAction.ActionCost; // Set the new cost for the current action
 
 			// Iterate over the parent action's unsat. conds
-			for (auto InheritedPair : ParentAction.UnSatisfiedConditions)
+			for (FWorldStatePair InheritedCondition : ParentAction.UnSatisfiedConditions)
 			{
 				// if this action does not already contain a certain condition
-				if (!CurrentAction.UnSatisfiedConditions.Contains(InheritedPair.Key))
+				if (!CurrentAction.UnsatisfiedConditionsContain(InheritedCondition))
 				{
 					// add the missing condition to this actions unsat. conds, as long as this action's effects don't satisfy it 
-					// (we know this action satisfies at least one of it's parents unsat. conds, or it wouldn't have been added to the open set by that parent
-					if (!(CurrentAction.Effects.Contains(InheritedPair.Key) && CurrentAction.Effects[InheritedPair.Key] == InheritedPair.Value))
+					// (we know this action satisfies at least one of it's parents unsat. conds, or it wouldn't have been added to the open set by that parent)
+					if (!CurrentAction.EffectsSatisfyCondition(InheritedCondition))
 					{
-						CurrentAction.UnSatisfiedConditions.Add(InheritedPair.Key, InheritedPair.Value);
+						CurrentAction.UnSatisfiedConditions.Add(InheritedCondition);
 					}
 				}
 			}
@@ -127,10 +124,10 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		ClosedSet.Add(CurrentAction);
 
 		// Iterate over unsatisfied conditions stored on the current action (accumulated from previous actions explored on this path)
-		for (auto UnSatPair : CurrentAction.UnSatisfiedConditions)
+		for (auto UnSatCondition : CurrentAction.UnSatisfiedConditions)
 		{
 			// If this particular precondition is satisfied by the worldstate, we don't need to explore actions which also satisfy it, continue instead
-			if (CheckSingleConditionAgainstWorldState(UnSatPair.Key, UnSatPair.Value, WorldState))
+			if (CheckSingleConditionAgainstWorldState(UnSatCondition, WorldState))
 			{
 				continue;
 			}
@@ -138,7 +135,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 			for (FAction CheckAction : CurrentActionSet)
 			{
 				// Check if the action satisfies the condition we're currently considering.
-				if (CheckAction.Effects.Contains(UnSatPair.Key) && CheckAction.Effects[UnSatPair.Key] == UnSatPair.Value)
+				if (CheckAction.EffectsSatisfyCondition(UnSatCondition))
 				{
 					//ToDo: This is where we might spawn a ContextCheckActor, or now that I think of it, call a more general Context Checker. Either way, ignoring that step for now
 					// The context check actors could pull double duty: check if an action is possible and check if it is effective
@@ -152,11 +149,11 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 							CheckAction.ParentActionID = CurrentAction.ActionID;
 							CheckAction.UnSatisfiedConditions = CurrentAction.UnSatisfiedConditions; // Set the new set of unsat. conds. for the check action (inherited from current)
 							AppendMapNonDestructive(CheckAction.UnSatisfiedConditions, CheckAction.Preconditions); // Add the action's own preconditions back to the unsat. list
-							CheckAction.UnSatisfiedConditions.Remove(UnSatPair.Key); // Remove the unsat. cond. which we've just verified is satisfied by the check action
+							CheckAction.UnSatisfiedConditions.Remove(UnSatCondition);
 						}
 					}
 					else
-					{						
+					{					
 						CheckAction.ParentActionID = CurrentAction.ActionID;
 						OpenSet.Add(CheckAction);
 					}
@@ -168,7 +165,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		{
 			if (CheckAndUpdateBestCost(CurrentAction, BestCost))
 			{
-				Plan = ReconstructPlan(CurrentAction.ActionID, ClosedSet, GoalKey, GoalValue, RootID);
+				Plan = ReconstructPlan(CurrentAction.ActionID, ClosedSet, GoalState, RootID);
 			}
 		}
 	}
@@ -179,7 +176,7 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 TArray<FAction> UPlannerSubsystem::ReconstructPlan(
 	FGuid FirstActionID, 
 	TArray<FAction> InActionSet, 
-	FName GoalKey, bool GoalValue, 
+	FWorldStatePair GoalState,
 	FGuid RootID)
 {
 	TArray<FAction> Plan = TArray<FAction>();
@@ -219,32 +216,24 @@ FAction UPlannerSubsystem::FetchActionByID(FGuid ActionID, TArray<FAction>& Curr
 	return EmptyAction;
 }
 
-bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState)
+bool UPlannerSubsystem::CheckConditionsAgainstWorldState(const TArray<FWorldStatePair>& InUnsatisfiedConditions, const TArray<FWorldStatePair>& InWorldState)
 {
-	for (auto UnSatPair : InUnsatisfiedConditions)
+	for (auto UnSatCondition : InUnsatisfiedConditions)
 	{
-		if (!InWorldState.Contains(UnSatPair.Key))
+		for (auto WorldStateCondition : InWorldState)
 		{
-			return false;
-		}
-		else if (UnSatPair.Value != InWorldState[UnSatPair.Key])
-		{
-			return false;
+			if (!UnSatCondition.IsCompatible(WorldStateCondition)) return false;
 		}
 	}
 
 	return true;
 }
 
-bool UPlannerSubsystem::CheckSingleConditionAgainstWorldState(FName ConditionKey, bool ConditionValue, const TMap<FName, bool>& InWorldState)
+bool UPlannerSubsystem::CheckSingleConditionAgainstWorldState(FWorldStatePair Condition, const TArray<FWorldStatePair>& InWorldState)
 {
-	if (!InWorldState.Contains(ConditionKey))
+	for (auto WorldStateCondition : InWorldState)
 	{
-		return false;
-	}
-	else if (ConditionValue != InWorldState[ConditionKey])
-	{
-		return false;
+		if (!WorldStateCondition.IsCompatible(Condition)) return false;
 	}
 	
 	return true;
@@ -264,11 +253,25 @@ bool UPlannerSubsystem::CheckAndUpdateBestCost(FAction Action, int& OutBestCost)
 	}
 }
 
-void UPlannerSubsystem::AppendMapNonDestructive(TMap<FName, bool>& TargetMap, TMap<FName, bool>& SourceMap)
+void UPlannerSubsystem::AppendMapNonDestructive(TArray<FWorldStatePair>& TargetMap, TArray<FWorldStatePair>& SourceMap)
 {
-	for (const auto& pair : SourceMap)
+	for (const auto& Pair : SourceMap)
 	{
-		TargetMap.Add(pair.Key, pair.Value);
+		TargetMap.Add(Pair);
+	}
+}
+
+void UPlannerSubsystem::AppendConditionsNoDuplicates(TArray<FWorldStatePair>& TargetArray, TArray<FWorldStatePair>& SourceArray)
+{
+	for (const FWorldStatePair& SourcePair : SourceArray)
+	{
+		for (const FWorldStatePair& TargetPair : TargetArray)
+		{
+			if (SourcePair.Key != TargetPair.Key)
+			{
+				TargetArray.Add(SourcePair);
+			}
+		}
 	}
 }
 

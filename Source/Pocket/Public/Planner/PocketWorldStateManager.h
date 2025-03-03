@@ -19,7 +19,7 @@ class POCKET_API APocketWorldStateManager : public AActor, public IWorldStateMan
 public:	
 	APocketWorldStateManager();
 
-	virtual TMap<FName, bool> RequestWorldState_Implementation(APlannerAIController* Agent) override;
+	virtual TArray<FWorldStatePair> RequestWorldState_Implementation(APlannerAIController* Agent) override;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AItemBase> FoodClass;

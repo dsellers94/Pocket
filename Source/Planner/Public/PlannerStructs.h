@@ -9,6 +9,70 @@ class AContextCheckActor;
 class AActionExecutionActor;
 
 USTRUCT(BlueprintType)
+struct FWorldStatePair
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Key;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool Value;
+
+	bool IsCompatible(const FWorldStatePair OtherPair)
+	{
+		return Key != OtherPair.Key || (Key == OtherPair.Key && Value == OtherPair.Value);
+	}
+
+	bool Satisfies(const FWorldStatePair OtherPair)
+	{
+		return Key == OtherPair.Key && Value == OtherPair.Value;
+	}
+
+	FWorldStatePair()
+	{
+		Key = FName("NONE");
+		Value = false;
+	}
+
+	FWorldStatePair(FName NewKey, bool NewValue)
+	{
+		Key = NewKey;
+		Value = NewValue;
+	}
+
+	bool operator==(const FWorldStatePair& OtherPair) const
+	{
+		return Key == OtherPair.Key && Value == OtherPair.Value;
+	}
+
+};
+
+USTRUCT(BlueprintType)
+struct FGoal
+{
+	GENERATED_BODY()
+
+	bool operator==(const FGoal& Other) const
+	{
+		return GoalID == Other.GoalID;
+	}
+
+public:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FWorldStatePair GoalState;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGuid GoalID = FGuid::NewGuid();
+
+	UPROPERTY(EditDefaultsOnly)
+	int Priority = 0;
+};
+
+USTRUCT(BlueprintType)
 struct FAction
 {
 	GENERATED_BODY()
@@ -20,6 +84,27 @@ struct FAction
 
 public:
 
+	bool EffectsSatisfyCondition(FWorldStatePair Condition)
+	{
+		for (FWorldStatePair Pair : Effects)
+		{
+			if (Pair.Satisfies(Condition)) 
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool UnsatisfiedConditionsContain(FWorldStatePair Condition)
+	{
+		for (FWorldStatePair Pair : UnSatisfiedConditions)
+		{
+			if (Pair.Key == Condition.Key) return true;
+		}
+		return false;
+	}
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName ActionName;
 
@@ -27,10 +112,10 @@ public:
 	FGuid ActionID = FGuid::NewGuid();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<FName, bool> Preconditions;
+	TArray<FWorldStatePair> Preconditions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<FName, bool> Effects;
+	TArray<FWorldStatePair> Effects;
 
 	UPROPERTY()
 	FGuid ParentActionID;
@@ -42,7 +127,7 @@ public:
 	int ActionCost = 1;
 
 	UPROPERTY()
-	TMap<FName, bool> UnSatisfiedConditions;
+	TArray<FWorldStatePair> UnSatisfiedConditions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;

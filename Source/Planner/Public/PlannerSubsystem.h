@@ -25,18 +25,16 @@ public:
 	void RequestPlan(
 		APlannerAIController* Agent,
 		const TArray<FAction>& ActionSet,
-		TMap<FName, bool> WorldState,
-		FName GoalKey,
-		bool GoalValue,
+		TArray<FWorldStatePair> WorldState,
+		FWorldStatePair GoalState,
 		FGuid PlanID);
 	
 	UFUNCTION()
 	TArray<FAction> GeneratePlan(
 		APlannerAIController* Agent,
 		const TArray<FAction>& ActionSet,
-		TMap<FName, bool> WorldState, 
-		FName GoalKey,
-		bool GoalValue);
+		TArray<FWorldStatePair> WorldState, 
+		FWorldStatePair GoalState);
 
 private:
 
@@ -44,23 +42,25 @@ private:
 	TArray<FAction> ReconstructPlan(
 		FGuid FirstActionID, 
 		TArray<FAction> InActionSet, 
-		FName GoalKey, 
-		bool GoalValue,
+		FWorldStatePair GoalState,
 		FGuid RootID);
 
 	UFUNCTION()
 	FAction FetchActionByID(FGuid ActionID, TArray<FAction>& CurrentActionSet);
 
 	UFUNCTION()
-	bool CheckConditionsAgainstWorldState(const TMap<FName, bool>& InUnsatisfiedConditions, const TMap<FName, bool>& InWorldState);
+	bool CheckConditionsAgainstWorldState(const TArray<FWorldStatePair>& InUnsatisfiedConditions, const TArray<FWorldStatePair>& InWorldState);
 
 	UFUNCTION()
-	bool CheckSingleConditionAgainstWorldState(FName ConditionKey, bool ConditionValue, const TMap<FName, bool>& InWorldState);
+	bool CheckSingleConditionAgainstWorldState(FWorldStatePair Condition, const TArray<FWorldStatePair>& InWorldState);
 
 	UFUNCTION()
 	bool CheckAndUpdateBestCost(FAction Action, int& OutBestCost);
 
 	UFUNCTION()
-	void AppendMapNonDestructive(TMap<FName, bool>& TargetMap, TMap<FName, bool>& SourceMap);
+	void AppendMapNonDestructive(TArray<FWorldStatePair>& TargetMap, TArray<FWorldStatePair>& SourceMap);
+
+	UFUNCTION()
+	void AppendConditionsNoDuplicates(TArray<FWorldStatePair>& TargetArray, TArray<FWorldStatePair>& SourceArray);
 	
 };

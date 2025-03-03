@@ -94,7 +94,7 @@ void APlannerAIController::GenerateActionSetFromRows()
 	}
 }
 
-void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
+void APlannerAIController::RequestPlan(FWorldStatePair GoalState)
 {	
 	if (!IsValid(PlannerSubsystem))
 	{
@@ -110,14 +110,13 @@ void APlannerAIController::RequestPlan(FName GoalKey, bool GoalValue)
 			this,
 			ActionSet,
 			WorldState,
-			GoalKey,
-			GoalValue);
+			GoalState);
 
 		OnPlanningComplete(CurrentPlanID, NewPlan);
 	}
 	else
 	{
-		PlannerSubsystem->RequestPlan(this, ActionSet, WorldState, GoalKey, GoalValue, CurrentPlanID);
+		PlannerSubsystem->RequestPlan(this, ActionSet, WorldState, GoalState, CurrentPlanID);
 	}
 }
 

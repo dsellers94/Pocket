@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "PlannerStructs.h"
 #include "WorldStateManagerInterface.generated.h"
 
 class APlannerAIController;
@@ -22,7 +23,7 @@ class PLANNER_API IWorldStateManagerInterface
 public: 
 
 	UFUNCTION(BlueprintNativeEvent)
-	TMap<FName, bool> RequestWorldState(APlannerAIController* Agent);
+	TArray<FWorldStatePair> RequestWorldState(APlannerAIController* Agent);
 
 };
 

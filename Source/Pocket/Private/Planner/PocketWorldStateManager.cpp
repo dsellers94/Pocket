@@ -20,9 +20,9 @@ void APocketWorldStateManager::BeginPlay()
 	
 }
 
-TMap<FName, bool> APocketWorldStateManager::RequestWorldState_Implementation(APlannerAIController* Agent)
+TArray<FWorldStatePair> APocketWorldStateManager::RequestWorldState_Implementation(APlannerAIController* Agent)
 {
-	TMap<FName, bool> WorldState = TMap<FName, bool>();
+	TArray<FWorldStatePair> WorldState = TArray<FWorldStatePair>();
 
 	UpdateLevelWorldStateValues();
 
@@ -45,15 +45,16 @@ TMap<FName, bool> APocketWorldStateManager::RequestWorldState_Implementation(APl
 		return WorldState;
 	}
 
-	WorldState.Add(FName("kIsHoldingFood"), AgentInventory->HasItemByClass(FoodClass));
-	WorldState.Add(FName("kIsHoldingPlow"), AgentInventory->HasItemByClass(PlowClass));
-	WorldState.Add(FName("kIsHoldingSeeds"), AgentInventory->HasItemByClass(SeedsClass));
-	WorldState.Add(FName("kFoodOnMap"),bFoodOnMap);
-	WorldState.Add(FName("kPlowOnMap"), bPlowOnMap);
-	WorldState.Add(FName("kSeedsOnMap"), bSeedsOnMap);
-	WorldState.Add(FName("kSoilOnMap"), bSoilOnMap);
-	WorldState.Add(FName("kSoilIsAvailable"), bSoilIsAvailable);
-	WorldState.Add(FName("kFoodIsDelivered"), bFoodIsDelivered);
+	WorldState.Add(FWorldStatePair(FName("KIsHoldingFood"), AgentInventory->HasItemByClass(FoodClass)));
+	WorldState.Add(FWorldStatePair(FName("kIsHoldingPlow"), AgentInventory->HasItemByClass(PlowClass)));
+	WorldState.Add(FWorldStatePair(FName("kIsHoldingSeeds"), AgentInventory->HasItemByClass(SeedsClass)));
+	WorldState.Add(FWorldStatePair(FName("kFoodOnMap"), bFoodOnMap));
+	WorldState.Add(FWorldStatePair(FName("kPlowOnMap"), bPlowOnMap));
+	WorldState.Add(FWorldStatePair(FName("kSeedsOnMap"), bSeedsOnMap));
+	WorldState.Add(FWorldStatePair(FName("kSoilOnMap"), bSoilOnMap));
+	WorldState.Add(FWorldStatePair(FName("kFoodIsGrowing"), bFoodIsGrowing));
+	WorldState.Add(FWorldStatePair(FName("kSoilIsAvailable"), bSoilIsAvailable));
+	WorldState.Add(FWorldStatePair(FName("kFoodIsDelivered"), bFoodIsDelivered));
 
 
 	return WorldState;
