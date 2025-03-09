@@ -28,9 +28,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInventoryComponent> InventoryComponent = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UBehaviorTree> BehaviorTree = nullptr;
-
 	UFUNCTION(BlueprintCallable)
 	bool AttemptItemPickup(TSubclassOf<AItemBase> ItemClass);
 

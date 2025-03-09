@@ -13,7 +13,6 @@ class POCKET_API AFarmerAIController : public APocketAIController
 
 public:
 
-	virtual void UpdateInfo() override;
 
 	
 };

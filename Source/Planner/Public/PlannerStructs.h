@@ -147,6 +147,15 @@ struct FActionRow : public FTableRowBase
 	FAction Action;
 };
 
+USTRUCT(BlueprintType)
+struct FGoalRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GoalData")
+	FGoal Goal;
+};
+
 class PLANNER_API PlannerStructs
 {
 public:

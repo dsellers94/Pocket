@@ -77,6 +77,8 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 
 	ActionRows = ControlledPlannerComponent->ActionRows;
 
+	ControlledPlannerComponent->InitializeGoalSelection(this);
+
 	GenerateActionSetFromRows();
 }
 

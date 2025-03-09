@@ -8,6 +8,7 @@
 #include "PlannerStructs.h"
 #include "PlannerComponent.generated.h"
 
+class APlannerAIController;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PLANNER_API UPlannerComponent : public UActorComponent
@@ -17,14 +18,36 @@ class PLANNER_API UPlannerComponent : public UActorComponent
 public:	
 	UPlannerComponent();
 
+	UPROPERTY()
+	TObjectPtr<APlannerAIController> AIController = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FDataTableRowHandle> ActionRows;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FDataTableRowHandle> GoalRows;
+
+	UPROPERTY(EditDefaultsOnly)
+	float GoalUpdateFrequency = 0.1;
+
+	UPROPERTY()
+	FGoal SelectedGoal = FGoal();
+
+	UFUNCTION()
+	void InitializeGoalSelection(APlannerAIController* NewController);
+
+	UFUNCTION()
+	void SelectGoal();
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+private:
+
+	UPROPERTY()
+	FTimerHandle GoalUpdateTimerHandle;
 
 };
