@@ -10,6 +10,8 @@
 
 class APlannerAIController;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectedGoalChanged);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PLANNER_API UPlannerComponent : public UActorComponent
 {
@@ -19,13 +21,16 @@ public:
 	UPlannerComponent();
 
 	UPROPERTY()
+	FOnSelectedGoalChanged OnSelectedGoalChanged;
+
+	UPROPERTY()
 	TObjectPtr<APlannerAIController> AIController = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FDataTableRowHandle> ActionRows;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FDataTableRowHandle> GoalRows;
+	TArray<FGoal> Goals;
 
 	UPROPERTY(EditDefaultsOnly)
 	float GoalUpdateFrequency = 0.1;
@@ -37,7 +42,10 @@ public:
 	void InitializeGoalSelection(APlannerAIController* NewController);
 
 	UFUNCTION()
-	void SelectGoal();
+	void CheckPriorityGoal();
+
+	UFUNCTION()
+	bool CheckGoalAgainstWorldState(TArray<FWorldStatePair> InWorldState, FGoal InGoal);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

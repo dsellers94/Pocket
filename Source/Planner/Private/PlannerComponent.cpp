@@ -31,12 +31,12 @@ void UPlannerComponent::InitializeGoalSelection(APlannerAIController* NewControl
 	GetWorld()->GetTimerManager().SetTimer(
 		GoalUpdateTimerHandle,
 		this,
-		&ThisClass::SelectGoal,
+		&ThisClass::CheckPriorityGoal,
 		GoalUpdateFrequency,
 		true);
 }
 
-void UPlannerComponent::SelectGoal()
+void UPlannerComponent::CheckPriorityGoal()
 {
 	if (!IsValid(AIController))
 	{
@@ -48,22 +48,34 @@ void UPlannerComponent::SelectGoal()
 	AIController->RequestWorldState();
 	TArray<FWorldStatePair> WorldState = AIController->WorldState;
 
-	for (const FDataTableRowHandle RowHandle : GoalRows)
+	for (const FGoal Goal : Goals)
 	{
-		const FGoalRow* FoundRow = RowHandle.GetRow<FGoalRow>(__FUNCTION__);
-		if (FoundRow == nullptr)
+		if (!CheckGoalAgainstWorldState(WorldState, Goal)) // If goal is not satisfied by WorldState
 		{
-			UE_LOG(LogPlanner, Error, TEXT("PlannerComponent: Failed to get GoalRow data from GoalRow Handle"));
-			continue;
-		}
-
-		FGoal Goal = FoundRow->Goal;
-		if (Goal.Priority > HighestPriority)
-		{
-			// Check if this goal is currently satisfied by the worldstate.
+			if (Goal.Priority > HighestPriority)
+			{
+				HighestPriority = Goal.Priority;
+				if (SelectedGoal != Goal)
+				{
+					OnSelectedGoalChanged.Broadcast();
+				}
+				SelectedGoal = Goal;
+			}
 		}
 	}
+
+
 }
+
+bool UPlannerComponent::CheckGoalAgainstWorldState(TArray<FWorldStatePair> InWorldState, FGoal InGoal)
+{
+	for (FWorldStatePair Pair : InWorldState)
+	{
+		if (Pair.Satisfies(InGoal.GoalState)) return true;
+	}
+	return false;
+}
+
 
 
 
