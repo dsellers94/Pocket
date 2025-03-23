@@ -36,6 +36,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AFoodStashBase> FoodStashClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> MonsterClass;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -63,8 +66,11 @@ protected:
 	UPROPERTY()
 	bool bSeedsOnMap = false;
 
+	UPROPERTY()
+	bool bMonsterIsTooClose = false;
+
 	UFUNCTION()
-	void UpdateLevelWorldStateValues();
+	void UpdateLevelWorldStateValues(APlannerAIController* Agent);
 
 
 };

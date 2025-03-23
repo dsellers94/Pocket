@@ -94,8 +94,14 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AActionExecutionActor> CurrentExecutionActor = nullptr;
 
+	UPROPERTY()
+	FGoal CurrentGoal = FGoal();
+
 	UFUNCTION()
 	void OnExecutionActorLoaded();
+
+	UFUNCTION()
+	void OnSelectedGoalChanged(FGoal SelectedGoal);
 
 
 protected:

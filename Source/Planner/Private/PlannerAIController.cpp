@@ -77,6 +77,8 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 
 	ActionRows = ControlledPlannerComponent->ActionRows;
 
+	ControlledPlannerComponent->OnSelectedGoalChanged.AddDynamic(this, &ThisClass::OnSelectedGoalChanged);
+
 	ControlledPlannerComponent->InitializeGoalSelection(this);
 
 	GenerateActionSetFromRows();
@@ -84,6 +86,7 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 
 void APlannerAIController::GenerateActionSetFromRows()
 {
+	ActionSet.Empty();
 	for (const FDataTableRowHandle& Row : ActionRows)
 	{
 		const FActionRow* FoundRow = Row.GetRow<FActionRow>(__FUNCTION__);
@@ -182,6 +185,7 @@ void APlannerAIController::GetNextGoal()
 {
 	UE_LOG(LogPlanner, Warning, TEXT("Getting Next Goal"));
 	OnGettingNextGoal.Broadcast();
+	RequestPlan(CurrentGoal.GoalState);
 }
 
 void APlannerAIController::CancelPlan()
@@ -212,6 +216,13 @@ void APlannerAIController::OnExecutionActorLoaded()
 	CurrentExecutionActor->Execute();
 
 	UAssetManager::GetStreamableManager().Unload(SoftExecutionActor.ToSoftObjectPath());
+}
+
+void APlannerAIController::OnSelectedGoalChanged(FGoal SelectedGoal)
+{
+	CancelPlan();
+	RequestPlan(SelectedGoal.GoalState);
+	CurrentGoal = SelectedGoal;
 }
 
 void APlannerAIController::OnActionFailed()

@@ -24,7 +24,7 @@ TArray<FWorldStatePair> APocketWorldStateManager::RequestWorldState_Implementati
 {
 	TArray<FWorldStatePair> WorldState = TArray<FWorldStatePair>();
 
-	UpdateLevelWorldStateValues();
+	UpdateLevelWorldStateValues(Agent);
 
 	if (!IsValid(Agent))
 	{
@@ -55,12 +55,12 @@ TArray<FWorldStatePair> APocketWorldStateManager::RequestWorldState_Implementati
 	WorldState.Add(FWorldStatePair(FName("kFoodIsGrowing"), bFoodIsGrowing));
 	WorldState.Add(FWorldStatePair(FName("kSoilIsAvailable"), bSoilIsAvailable));
 	WorldState.Add(FWorldStatePair(FName("kFoodIsDelivered"), bFoodIsDelivered));
-
+	WorldState.Add(FWorldStatePair(FName("kMonsterIsTooClose"), bMonsterIsTooClose));
 
 	return WorldState;
 }
 
-void APocketWorldStateManager::UpdateLevelWorldStateValues()
+void APocketWorldStateManager::UpdateLevelWorldStateValues(APlannerAIController* Agent)
 {
 	TArray<AActor*> Actors = TArray<AActor*>();
 	
@@ -115,5 +115,27 @@ void APocketWorldStateManager::UpdateLevelWorldStateValues()
 		}
 	}
 	Actors.Empty();
+
+	APawn* AgentPawn = Agent->GetPawn();
+	if (!IsValid(AgentPawn))
+	{
+		UE_LOG(LogPocket, Warning, TEXT("PocketWorldStateManager: Failed to get agent pawn"));
+		return;
+	}
+
+	// Set bMonsterIsTooClose
+	UGameplayStatics::GetAllActorsOfClass(this, MonsterClass, Actors);
+	FVector AgentLocation = AgentPawn->GetActorLocation();
+	bMonsterIsTooClose = false;
+	for (AActor* Actor : Actors)
+	{
+		FVector MonsterLocation = Actor->GetActorLocation();
+		float MonsterDistance = FVector::Distance(MonsterLocation, AgentLocation);
+		if (MonsterDistance < 500.f)
+		{
+			bMonsterIsTooClose = true;
+			break;
+		}
+	}
 
 }

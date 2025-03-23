@@ -14,6 +14,23 @@ UPlannerComponent::UPlannerComponent()
 void UPlannerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GenerateGoalSetFromRows();
+}
+
+void UPlannerComponent::GenerateGoalSetFromRows()
+{
+	Goals.Empty();
+	for (const FDataTableRowHandle& Row : GoalRows)
+	{
+		const FGoalRow* FoundRow = Row.GetRow<FGoalRow>(__FUNCTION__);
+		if (FoundRow == nullptr)
+		{
+			UE_LOG(LogPlanner, Error, TEXT("PlannerAIController: Failed to get action data from Action Row Handle"));
+			return;
+		}
+		Goals.Add(FoundRow->Goal);
+	}
 }
 
 void UPlannerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -48,22 +65,24 @@ void UPlannerComponent::CheckPriorityGoal()
 	AIController->RequestWorldState();
 	TArray<FWorldStatePair> WorldState = AIController->WorldState;
 
-	for (const FGoal Goal : Goals)
+	FGoal CandidateGoal = FGoal();
+	for (const FGoal& Goal : Goals)
 	{
-		if (!CheckGoalAgainstWorldState(WorldState, Goal)) // If goal is not satisfied by WorldState
+		if (Goal.Priority >= HighestPriority)
 		{
-			if (Goal.Priority > HighestPriority)
+			if (!CheckGoalAgainstWorldState(WorldState, Goal))
 			{
 				HighestPriority = Goal.Priority;
-				if (SelectedGoal != Goal)
-				{
-					OnSelectedGoalChanged.Broadcast();
-				}
-				SelectedGoal = Goal;
+				CandidateGoal = Goal;
 			}
 		}
 	}
-
+	if (SelectedGoal != CandidateGoal)
+	{
+		OnSelectedGoalChanged.Broadcast(CandidateGoal);
+		UE_LOG(LogPlanner, Warning, TEXT("Selected Goal: %s"), *CandidateGoal.GoalState.Key.ToString());
+	}
+	SelectedGoal = CandidateGoal;
 
 }
 

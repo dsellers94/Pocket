@@ -10,7 +10,7 @@
 
 class APlannerAIController;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectedGoalChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedGoalChanged, FGoal, SelectedGoal);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PLANNER_API UPlannerComponent : public UActorComponent
@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FDataTableRowHandle> ActionRows;
+
+	UPROPERTY()
+	TArray<FDataTableRowHandle> GoalRows;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FGoal> Goals;
@@ -52,6 +55,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void GenerateGoalSetFromRows();
 
 private:
 

@@ -8,6 +8,14 @@
 class AContextCheckActor;
 class AActionExecutionActor;
 
+UENUM(BlueprintType)
+enum EGoalPriority : uint8
+{
+	EGP_Low		UMETA(DisplayName = "Low"),
+	EGP_Medmium UMETA(DisplayName = "Medium"),
+	EGP_High	UMETA(DisplayName = "High"),
+};
+
 USTRUCT(BlueprintType)
 struct FWorldStatePair
 {
@@ -69,7 +77,7 @@ public:
 	FGuid GoalID = FGuid::NewGuid();
 
 	UPROPERTY(EditDefaultsOnly)
-	int Priority = 0;
+	TEnumAsByte<EGoalPriority> Priority = EGP_Low;
 };
 
 USTRUCT(BlueprintType)
@@ -145,6 +153,15 @@ struct FActionRow : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ActionData")
 	FAction Action;
+};
+
+USTRUCT(BlueprintType)
+struct FGoalRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GoalData")
+	FGoal Goal;
 };
 
 
