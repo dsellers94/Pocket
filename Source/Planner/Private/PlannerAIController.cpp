@@ -185,6 +185,7 @@ void APlannerAIController::GetNextGoal()
 {
 	UE_LOG(LogPlanner, Warning, TEXT("Getting Next Goal"));
 	OnGettingNextGoal.Broadcast();
+	RequestWorldState();
 	RequestPlan(CurrentGoal.GoalState);
 }
 
@@ -221,6 +222,7 @@ void APlannerAIController::OnExecutionActorLoaded()
 void APlannerAIController::OnSelectedGoalChanged(FGoal SelectedGoal)
 {
 	CancelPlan();
+	RequestWorldState();
 	RequestPlan(SelectedGoal.GoalState);
 	CurrentGoal = SelectedGoal;
 }
