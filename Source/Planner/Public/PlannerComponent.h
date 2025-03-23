@@ -29,10 +29,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FDataTableRowHandle> ActionRows;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FDataTableRowHandle> GoalRows;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY()
 	TArray<FGoal> Goals;
 
 	UPROPERTY(EditDefaultsOnly)

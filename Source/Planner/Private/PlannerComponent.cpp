@@ -26,7 +26,7 @@ void UPlannerComponent::GenerateGoalSetFromRows()
 		const FGoalRow* FoundRow = Row.GetRow<FGoalRow>(__FUNCTION__);
 		if (FoundRow == nullptr)
 		{
-			UE_LOG(LogPlanner, Error, TEXT("PlannerAIController: Failed to get action data from Action Row Handle"));
+			UE_LOG(LogPlanner, Error, TEXT("PlannerAIController: Failed to get goal data from Goal Row Handle"));
 			return;
 		}
 		Goals.Add(FoundRow->Goal);

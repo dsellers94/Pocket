@@ -7,6 +7,7 @@
 #include "Item/SoilBase.h"
 #include "Pocket/Pocket.h"
 #include "Inventory/InventoryComponent.h"
+#include "NPC/Farmer.h"
 
 APocketWorldStateManager::APocketWorldStateManager()
 {
@@ -124,17 +125,21 @@ void APocketWorldStateManager::UpdateLevelWorldStateValues(APlannerAIController*
 	}
 
 	// Set bMonsterIsTooClose
-	UGameplayStatics::GetAllActorsOfClass(this, MonsterClass, Actors);
-	FVector AgentLocation = AgentPawn->GetActorLocation();
 	bMonsterIsTooClose = false;
-	for (AActor* Actor : Actors)
+	AFarmer* Farmer = Cast<AFarmer>(AgentPawn);
+	if (IsValid(Farmer))
 	{
-		FVector MonsterLocation = Actor->GetActorLocation();
-		float MonsterDistance = FVector::Distance(MonsterLocation, AgentLocation);
-		if (MonsterDistance < 500.f)
+		UGameplayStatics::GetAllActorsOfClass(this, MonsterClass, Actors);
+		FVector AgentLocation = Farmer->GetActorLocation();
+		for (AActor* Actor : Actors)
 		{
-			bMonsterIsTooClose = true;
-			break;
+			FVector MonsterLocation = Actor->GetActorLocation();
+			float MonsterDistance = FVector::Distance(MonsterLocation, AgentLocation);
+			if (MonsterDistance < Farmer->MonsterDistanceTolerance)
+			{
+				bMonsterIsTooClose = true;
+				break;
+			}
 		}
 	}
 
