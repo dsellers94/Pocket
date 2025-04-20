@@ -64,6 +64,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PrintCurrentPlan();
 
+	UFUNCTION(BlueprintCallable)
+	void PrintCurrentAction();
 
 protected:
 

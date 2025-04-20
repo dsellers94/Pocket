@@ -249,9 +249,21 @@ void APlannerAIController::PrintActionSet()
 
 void APlannerAIController::PrintCurrentPlan()
 {
+	UE_LOG(LogPlanner, Warning, TEXT("----------"));
 	for (FAction Action : CurrentPlan)
 	{
 		UE_LOG(LogPlanner, Warning, TEXT("%s"), *Action.ActionName.ToString());
 	}
+}
+
+void APlannerAIController::PrintCurrentAction()
+{
+	if (!IsValid(CurrentExecutionActor))
+	{
+		UE_LOG(LogPlanner, Warning, TEXT("No Valid Exceution Actor"));
+		return;
+	}
+	FString CurrentActionName = CurrentExecutionActor->GetActorNameOrLabel();
+	UE_LOG(LogPlanner, Warning, TEXT("Current Action: %s"), *CurrentActionName);
 }
 
