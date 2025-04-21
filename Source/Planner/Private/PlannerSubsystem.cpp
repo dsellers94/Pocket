@@ -101,6 +101,11 @@ TArray<FAction> UPlannerSubsystem::GeneratePlan(
 		if (CurrentAction.ParentActionID != RootID)
 		{
 			FAction ParentAction = FetchActionByID(CurrentAction.ParentActionID, ClosedSet);
+
+			// This is where we can (hopefully) run a contextu
+			// 
+			// 
+			// al cost analysis actor.
 			
 			CurrentAction.CalculatedCost = ParentAction.CalculatedCost + CurrentAction.ActionCost; // Set the new cost for the current action
 
