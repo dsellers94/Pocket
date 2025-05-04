@@ -41,7 +41,7 @@ public:
 	bool bSynchronousPlanningMode = false;
 
 	UPROPERTY(EditDefaultsOnly)
-	float ActionEvaluationRate = 0.5;
+	float ActionEvaluationRate = 3.f;
 
 	UFUNCTION()
 	void OnPlanningComplete(FGuid PlanID, TArray<FAction> Plan);
@@ -76,7 +76,10 @@ protected:
 	TObjectPtr<UPlannerSubsystem> PlannerSubsystem = nullptr;
 
 	UPROPERTY()
-	TArray<FAction> ActionSet = TArray<FAction>();
+	TArray<FAction> FullActionSet = TArray<FAction>();
+
+	UPROPERTY()
+	TArray<FAction> AvailableActionSet = TArray<FAction>();
 
 	UPROPERTY()
 	TArray<FDataTableRowHandle> ActionRows;
@@ -100,6 +103,12 @@ protected:
 	TObjectPtr<AActionExecutionActor> CurrentExecutionActor = nullptr;
 
 	UPROPERTY()
+	TSoftClassPtr<AContextCheckActor> SoftContextCheckActor = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<AContextCheckActor> CurrentContextCheckActor = nullptr;
+
+	UPROPERTY()
 	FGoal CurrentGoal = FGoal();
 
 	UPROPERTY()
@@ -107,6 +116,9 @@ protected:
 
 	UPROPERTY()
 	bool StillEvaluating = false;
+
+	UPROPERTY()
+	int ActionEvaluationIndex = 0;
 
 	UFUNCTION()
 	void OnExecutionActorLoaded();
@@ -121,6 +133,15 @@ protected:
 
 	UFUNCTION()
 	void EvaluateActions();
+
+	UFUNCTION()
+	void EvaluateNextAction();
+
+	UFUNCTION()
+	void UpdateAvailableActionSet();
+
+	UFUNCTION()
+	void OnContextCheckActorLoaded();
 
 	virtual void BeginPlay() override;
 	

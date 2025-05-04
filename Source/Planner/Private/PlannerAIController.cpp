@@ -10,6 +10,7 @@
 #include "PlannerSubsystem.h"
 #include "WorldStateManagerInterface.h"
 #include "ActionExecutionActor.h"
+#include "ContextCheckActor.h"
 
 
 void APlannerAIController::BeginPlay()
@@ -93,7 +94,7 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 
 void APlannerAIController::GenerateActionSetFromRows()
 {
-	ActionSet.Empty();
+	FullActionSet.Empty();
 	for (const FDataTableRowHandle& Row : ActionRows)
 	{
 		const FActionRow* FoundRow = Row.GetRow<FActionRow>(__FUNCTION__);
@@ -102,7 +103,7 @@ void APlannerAIController::GenerateActionSetFromRows()
 			UE_LOG(LogPlanner, Error, TEXT("PlannerAIController: Failed to get action data from Action Row Handle"));
 			return;
 		}
-		ActionSet.Add(FoundRow->Action);
+		FullActionSet.Add(FoundRow->Action);
 	}
 }
 
@@ -120,7 +121,7 @@ void APlannerAIController::RequestPlan(FWorldStatePair GoalState)
 	{
 		TArray<FAction> NewPlan = PlannerSubsystem->GeneratePlan(
 			this,
-			ActionSet,
+			AvailableActionSet,
 			WorldState,
 			GoalState);
 
@@ -128,7 +129,7 @@ void APlannerAIController::RequestPlan(FWorldStatePair GoalState)
 	}
 	else
 	{
-		PlannerSubsystem->RequestPlan(this, ActionSet, WorldState, GoalState, CurrentPlanID);
+		PlannerSubsystem->RequestPlan(this, AvailableActionSet, WorldState, GoalState, CurrentPlanID);
 	}
 }
 
@@ -246,14 +247,84 @@ void APlannerAIController::OnActionFailed()
 
 void APlannerAIController::EvaluateActions()
 {
+	if (StillEvaluating) return;
+
 	StillEvaluating = true;
 
+	CurrentActionIndex = 0;
 
+	EvaluateNextAction();
+}
+
+void APlannerAIController::EvaluateNextAction()
+{
+	if (IsValid(CurrentContextCheckActor))
+	{
+		CurrentContextCheckActor->Destroy();
+	}
+	CurrentContextCheckActor = nullptr;
+
+	if (!FullActionSet.IsValidIndex(ActionEvaluationIndex))
+	{
+		StillEvaluating = false;
+		UpdateAvailableActionSet();
+		return;
+	}
+
+	FAction CurrentAction = FullActionSet[ActionEvaluationIndex];
+
+	if (!CurrentAction.bNeedsContextCheck)
+	{
+		ActionEvaluationIndex++;
+		EvaluateNextAction();
+		return;
+	}
+
+	SoftContextCheckActor = CurrentAction.ContextCheckActor;
+
+	FStreamableDelegate Delegate;
+	Delegate.BindUObject(this, &APlannerAIController::OnContextCheckActorLoaded);
+	UAssetManager::GetStreamableManager()
+		.RequestAsyncLoad(SoftContextCheckActor.ToSoftObjectPath(), Delegate);
+
+	ActionEvaluationIndex++;
+}
+
+void APlannerAIController::UpdateAvailableActionSet()
+{
+	AvailableActionSet.Empty();
+	for (FAction& Action : FullActionSet)
+	{
+		if (Action.bActionAvailable)
+		{
+			AvailableActionSet.Add(Action);
+		}
+	}
+}
+
+void APlannerAIController::OnContextCheckActorLoaded()
+{
+	UClass* ContextCheckActorClass = SoftContextCheckActor.Get();
+	AActor* Actor = GetWorld()->SpawnActor(ContextCheckActorClass);
+
+	if (!IsValid(Actor))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Failed to spawn ContextcheckActor"));
+		return;
+	}
+
+	CurrentContextCheckActor = Cast<AContextCheckActor>(Actor);
+
+	FullActionSet[ActionEvaluationIndex].bActionAvailable = CurrentContextCheckActor->CheckValidity(this);
+
+	UAssetManager::GetStreamableManager().Unload(SoftExecutionActor.ToSoftObjectPath());
+
+	EvaluateNextAction();
 }
 
 void APlannerAIController::PrintActionSet()
 {
-	for (FAction Action : ActionSet)
+	for (FAction Action : FullActionSet)
 	{
 		FString ActionString = Action.ToString();
 		UE_LOG(LogPlanner, Warning, TEXT("%s"), *ActionString);

@@ -134,6 +134,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int ActionCost = 1;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool bNeedsContextCheck = false;
+
+	UPROPERTY()
+	bool bActionAvailable = true;
+
 	UPROPERTY()
 	TArray<FWorldStatePair> UnSatisfiedConditions;
 
