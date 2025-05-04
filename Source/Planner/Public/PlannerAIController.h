@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintreadOnly)
 	bool bSynchronousPlanningMode = false;
 
+	UPROPERTY(EditDefaultsOnly)
+	float ActionEvaluationRate = 0.5;
+
 	UFUNCTION()
 	void OnPlanningComplete(FGuid PlanID, TArray<FAction> Plan);
 
@@ -99,19 +102,25 @@ protected:
 	UPROPERTY()
 	FGoal CurrentGoal = FGoal();
 
+	UPROPERTY()
+	FTimerHandle ActionEvaluationTimer;
+
+	UPROPERTY()
+	bool StillEvaluating = false;
+
 	UFUNCTION()
 	void OnExecutionActorLoaded();
 
 	UFUNCTION()
 	void OnSelectedGoalChanged(FGoal SelectedGoal);
-
-
-protected:
 	
 	virtual void OnPossess(APawn* InPawn) override;
 
 	UFUNCTION()
 	void GenerateActionSetFromRows();
+
+	UFUNCTION()
+	void EvaluateActions();
 
 	virtual void BeginPlay() override;
 	

@@ -82,6 +82,13 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 	ControlledPlannerComponent->InitializeGoalSelection(this);
 
 	GenerateActionSetFromRows();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		ActionEvaluationTimer,
+		this,
+		&ThisClass::EvaluateActions,
+		ActionEvaluationRate,
+		true);
 }
 
 void APlannerAIController::GenerateActionSetFromRows()
@@ -237,6 +244,12 @@ void APlannerAIController::OnActionFailed()
 	GetNextGoal();
 }
 
+void APlannerAIController::EvaluateActions()
+{
+	StillEvaluating = true;
+
+
+}
 
 void APlannerAIController::PrintActionSet()
 {

@@ -138,7 +138,7 @@ public:
 	TArray<FWorldStatePair> UnSatisfiedConditions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<AContextCheckActor> ContextCheckActorClass = nullptr;
+	TSoftClassPtr<AContextCheckActor> ContextCheckActor = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AActionExecutionActor> ActionExecutionActor = nullptr;
