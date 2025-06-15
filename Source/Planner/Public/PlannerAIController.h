@@ -15,6 +15,20 @@ class UPlannerComponent;
 class AActionExecutionActor;
 class UPlannerSubsystem;
 
+// TODO: We want RequestWorldState to also pass the FullActionSet to the World State Manager, and get an (async returned) available action set which includes adjusted action costs.
+
+// The key part (and most tedious to implement given the way I've set this up) is that the action costs need to be determined by async loaded ContextCheckActors per-action.
+// So that doesn't really need to happen in the world state manager, but maybe that's a better place for it because it would already have world information available.
+
+// SO! We should set this class up to async request a modified action set from the World State Manager, and migrate the code that exists here for async loading context check actors
+// to the world state manager, and expand it so that it calulcates a numeric cost as well as determing availability. This class will wait for the returned AvailableActionSet
+// (including cost determinations) before proceeding to request a plan from the Planner Subsystem (whih is already equipped to select the best plan based on the provided ActionCost
+// of each action in the set passed to it.
+
+// Because we will now be requesting the world state (and adjusted action set) from the world state manager asynchronously, we will need to implement and GUID event system like 
+// we have in the planner subsystem itself, to make sure this Agent is able to recognize it's own World State and AvailableActionSet return values when they come back
+// from the WorlsStateManager
+
 UCLASS()
 class PLANNER_API APlannerAIController : public AAIController
 {
