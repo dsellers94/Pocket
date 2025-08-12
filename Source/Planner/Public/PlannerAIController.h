@@ -25,9 +25,14 @@ class UPlannerSubsystem;
 // (including cost determinations) before proceeding to request a plan from the Planner Subsystem (whih is already equipped to select the best plan based on the provided ActionCost
 // of each action in the set passed to it.
 
-// Because we will now be requesting the world state (and adjusted action set) from the world state manager asynchronously, we will need to implement and GUID event system like 
+// Because we will now be requesting the world state (and adjusted action set) from the world state manager asynchronously, we will need to implement a GUID event system like 
 // we have in the planner subsystem itself, to make sure this Agent is able to recognize it's own World State and AvailableActionSet return values when they come back
 // from the WorlsStateManager
+
+// Update: I migrated the logic for iterating over context check actors into the PocketWorldStateManager so that it can be augmented, made to update the numerical cost of the actions
+// and made to fire an event delegate when it's evaluations are complete. This currently breaks the game because PlannerAIControl has no valid action set to use for a plan.
+// We still need to: add a que system and/or an action evaluation result pool (but let's go with que system for now) which will allow the world state manager to 
+// to GUIDs, pointers to agents, and action sets until evaluation if finished, and pop them off the array when complete.
 
 UCLASS()
 class PLANNER_API APlannerAIController : public AAIController
@@ -117,22 +122,7 @@ protected:
 	TObjectPtr<AActionExecutionActor> CurrentExecutionActor = nullptr;
 
 	UPROPERTY()
-	TSoftClassPtr<AContextCheckActor> SoftContextCheckActor = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AContextCheckActor> CurrentContextCheckActor = nullptr;
-
-	UPROPERTY()
 	FGoal CurrentGoal = FGoal();
-
-	UPROPERTY()
-	FTimerHandle ActionEvaluationTimer;
-
-	UPROPERTY()
-	bool StillEvaluating = false;
-
-	UPROPERTY()
-	int ActionEvaluationIndex = 0;
 
 	UFUNCTION()
 	void OnExecutionActorLoaded();
@@ -144,18 +134,6 @@ protected:
 
 	UFUNCTION()
 	void GenerateActionSetFromRows();
-
-	UFUNCTION()
-	void EvaluateActions();
-
-	UFUNCTION()
-	void EvaluateNextAction();
-
-	UFUNCTION()
-	void UpdateAvailableActionSet();
-
-	UFUNCTION()
-	void OnContextCheckActorLoaded();
 
 	virtual void BeginPlay() override;
 	

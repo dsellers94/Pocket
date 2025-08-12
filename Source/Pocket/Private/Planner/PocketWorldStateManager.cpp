@@ -8,6 +8,11 @@
 #include "Pocket/Pocket.h"
 #include "Inventory/InventoryComponent.h"
 #include "NPC/Farmer.h"
+#include "ContextCheckActor.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
+#include "Planner/Planner.h"
+
 
 APocketWorldStateManager::APocketWorldStateManager()
 {
@@ -143,4 +148,81 @@ void APocketWorldStateManager::UpdateLevelWorldStateValues(APlannerAIController*
 		}
 	}
 
+}
+
+void APocketWorldStateManager::EvaluateActions()
+{
+	if (StillEvaluating) return;
+
+	StillEvaluating = true;
+
+	ActionEvaluationIndex = 0;
+
+	EvaluateNextAction();
+}
+
+void APocketWorldStateManager::EvaluateNextAction()
+{
+	if (IsValid(CurrentContextCheckActor))
+	{
+		CurrentContextCheckActor->Destroy();
+	}
+	CurrentContextCheckActor = nullptr;
+
+	if (!InputActionSet.IsValidIndex(ActionEvaluationIndex))
+	{
+		StillEvaluating = false;
+		UpdateProcessedActionSet();
+		return;
+	}
+
+	FAction CurrentAction = InputActionSet[ActionEvaluationIndex];
+
+	if (!CurrentAction.bNeedsContextCheck)
+	{
+		ActionEvaluationIndex++;
+		EvaluateNextAction();
+		return;
+	}
+
+	SoftContextCheckActor = CurrentAction.ContextCheckActor;
+
+	FStreamableDelegate Delegate;
+	Delegate.BindUObject(this, &APocketWorldStateManager::OnContextCheckActorLoaded);
+	UAssetManager::GetStreamableManager()
+		.RequestAsyncLoad(SoftContextCheckActor.ToSoftObjectPath(), Delegate);
+
+	ActionEvaluationIndex++;
+}
+
+void APocketWorldStateManager::UpdateProcessedActionSet()
+{
+	ProcessedActionSet.Empty();
+	for (FAction& Action : InputActionSet)
+	{
+		if (Action.bActionAvailable)
+		{
+			ProcessedActionSet.Add(Action);
+		}
+	}
+}
+
+void APocketWorldStateManager::OnContextCheckActorLoaded()
+{
+	UClass* ContextCheckActorClass = SoftContextCheckActor.Get();
+	AActor* Actor = GetWorld()->SpawnActor(ContextCheckActorClass);
+
+	if (!IsValid(Actor))
+	{
+		//UE_LOG(LogPlanner, Error, TEXT("Failed to spawn ContextcheckActor"));
+		return;
+	}
+
+	CurrentContextCheckActor = Cast<AContextCheckActor>(Actor);
+
+	InputActionSet[ActionEvaluationIndex].bActionAvailable = CurrentContextCheckActor->CheckValidity(this);
+
+	UAssetManager::GetStreamableManager().Unload(SoftContextCheckActor.ToSoftObjectPath());
+
+	EvaluateNextAction();
 }
