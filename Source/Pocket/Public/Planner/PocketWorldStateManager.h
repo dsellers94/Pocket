@@ -19,6 +19,8 @@ class POCKET_API APocketWorldStateManager : public AActor, public IWorldStateMan
 public:	
 	APocketWorldStateManager();
 
+	virtual TArray<FWorldStatePair> RequestWorldState_Implementation(APlannerAIController* Agent) override;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AItemBase> FoodClass;
 
@@ -36,8 +38,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> MonsterClass;
-
-	virtual TArray<FWorldStatePair> RequestWorldState_Implementation(APlannerAIController* Agent) override;
 
 protected:
 
@@ -68,36 +68,6 @@ protected:
 
 	UPROPERTY()
 	bool bMonsterIsTooClose = false;
-
-	UPROPERTY()
-	TSoftClassPtr<AContextCheckActor> SoftContextCheckActor = nullptr;
-
-	UPROPERTY()
-	TObjectPtr<AContextCheckActor> CurrentContextCheckActor = nullptr;
-
-	UPROPERTY()
-	bool StillEvaluating = false;
-
-	UPROPERTY()
-	int ActionEvaluationIndex = 0;
-
-	UPROPERTY()
-	TArray<FAction> InputActionSet = TArray<FAction>();
-
-	UPROPERTY()
-	TArray<FAction> ProcessedActionSet = TArray<FAction>();
-
-	UFUNCTION()
-	void EvaluateActions();
-
-	UFUNCTION()
-	void EvaluateNextAction();
-
-	UFUNCTION()
-	void UpdateProcessedActionSet();
-
-	UFUNCTION()
-	void OnContextCheckActorLoaded();
 
 	UFUNCTION()
 	void UpdateLevelWorldStateValues(APlannerAIController* Agent);

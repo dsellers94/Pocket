@@ -10,6 +10,7 @@
 #include "PlannerSubsystem.h"
 #include "WorldStateManagerInterface.h"
 #include "ActionExecutionActor.h"
+#include "ContextCheckActor.h"
 
 
 void APlannerAIController::BeginPlay()
@@ -82,6 +83,13 @@ void APlannerAIController::OnPossess(APawn* InPawn)
 	ControlledPlannerComponent->InitializeGoalSelection(this);
 
 	GenerateActionSetFromRows();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		ActionEvaluationTimer,
+		this,
+		&ThisClass::EvaluateActions,
+		ActionEvaluationRate,
+		true);
 }
 
 void APlannerAIController::GenerateActionSetFromRows()
@@ -235,6 +243,83 @@ void APlannerAIController::OnActionFailed()
 	}
 	CurrentExecutionActor = nullptr;
 	GetNextGoal();
+}
+
+void APlannerAIController::EvaluateActions()
+{
+	if (StillEvaluating) return;
+
+	StillEvaluating = true;
+
+	CurrentActionIndex = 0;
+
+	EvaluateNextAction();
+}
+
+void APlannerAIController::EvaluateNextAction()
+{
+	if (IsValid(CurrentContextCheckActor))
+	{
+		CurrentContextCheckActor->Destroy();
+	}
+	CurrentContextCheckActor = nullptr;
+
+	if (!FullActionSet.IsValidIndex(ActionEvaluationIndex))
+	{
+		StillEvaluating = false;
+		UpdateAvailableActionSet();
+		return;
+	}
+
+	FAction CurrentAction = FullActionSet[ActionEvaluationIndex];
+
+	if (!CurrentAction.bNeedsContextCheck)
+	{
+		ActionEvaluationIndex++;
+		EvaluateNextAction();
+		return;
+	}
+
+	SoftContextCheckActor = CurrentAction.ContextCheckActor;
+
+	FStreamableDelegate Delegate;
+	Delegate.BindUObject(this, &APlannerAIController::OnContextCheckActorLoaded);
+	UAssetManager::GetStreamableManager()
+		.RequestAsyncLoad(SoftContextCheckActor.ToSoftObjectPath(), Delegate);
+
+	ActionEvaluationIndex++;
+}
+
+void APlannerAIController::UpdateAvailableActionSet()
+{
+	AvailableActionSet.Empty();
+	for (FAction& Action : FullActionSet)
+	{
+		if (Action.bActionAvailable)
+		{
+			AvailableActionSet.Add(Action);
+		}
+	}
+}
+
+void APlannerAIController::OnContextCheckActorLoaded()
+{
+	UClass* ContextCheckActorClass = SoftContextCheckActor.Get();
+	AActor* Actor = GetWorld()->SpawnActor(ContextCheckActorClass);
+
+	if (!IsValid(Actor))
+	{
+		UE_LOG(LogPlanner, Error, TEXT("Failed to spawn ContextcheckActor"));
+		return;
+	}
+
+	CurrentContextCheckActor = Cast<AContextCheckActor>(Actor);
+
+	FullActionSet[ActionEvaluationIndex].bActionAvailable = CurrentContextCheckActor->CheckValidity(this);
+
+	UAssetManager::GetStreamableManager().Unload(SoftExecutionActor.ToSoftObjectPath());
+
+	EvaluateNextAction();
 }
 
 void APlannerAIController::PrintActionSet()
