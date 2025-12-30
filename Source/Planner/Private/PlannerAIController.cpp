@@ -11,7 +11,7 @@
 #include "WorldStateManagerInterface.h"
 #include "ActionExecutionActor.h"
 #include "ContextCheckActor.h"
-
+UE_DISABLE_OPTIMIZATION
 
 void APlannerAIController::BeginPlay()
 {
@@ -276,6 +276,7 @@ void APlannerAIController::EvaluateNextAction()
 	if (!CurrentAction.bNeedsContextCheck)
 	{
 		ActionEvaluationIndex++;
+		UpdateAvailableActionSet();
 		EvaluateNextAction();
 		return;
 	}
@@ -351,3 +352,4 @@ void APlannerAIController::PrintCurrentAction()
 	UE_LOG(LogPlanner, Warning, TEXT("Current Action: %s"), *CurrentActionName);
 }
 
+UE_ENABLE_OPTIMIZATION
