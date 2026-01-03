@@ -251,7 +251,7 @@ void APlannerAIController::EvaluateActions()
 
 	StillEvaluating = true;
 
-	CurrentActionIndex = 0;
+	ActionEvaluationIndex = 0;
 
 	EvaluateNextAction();
 }

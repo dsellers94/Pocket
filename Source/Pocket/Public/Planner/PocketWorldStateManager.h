@@ -11,6 +11,7 @@
 class AItemBase;
 class AFoodStashBase;
 
+// Manager class which provides world state data (arrays of World State Pairs) when requested by Planner agents.
 UCLASS()
 class POCKET_API APocketWorldStateManager : public AActor, public IWorldStateManagerInterface
 {
