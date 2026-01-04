@@ -1,0 +1,136 @@
+{
+	"connections": [
+		{
+			"from": "math",
+			"from_port": 0,
+			"to": "Material",
+			"to_port": 0
+		},
+		{
+			"from": "wavelet_noise2",
+			"from_port": 0,
+			"to": "math",
+			"to_port": 0
+		},
+		{
+			"from": "fbm3",
+			"from_port": 0,
+			"to": "math",
+			"to_port": 1
+		},
+		{
+			"from": "math",
+			"from_port": 0,
+			"to": "Material",
+			"to_port": 4
+		},
+		{
+			"from": "math",
+			"from_port": 0,
+			"to": "Material",
+			"to_port": 2
+		},
+		{
+			"from": "math",
+			"from_port": 0,
+			"to": "Material",
+			"to_port": 1
+		}
+	],
+	"label": "Graph",
+	"longdesc": "",
+	"name": "@Node@817",
+	"node_position": {
+		"x": 0.0,
+		"y": 0.0
+	},
+	"nodes": [
+		{
+			"export_paths": {
+
+			},
+			"name": "Material",
+			"node_position": {
+				"x": 396.0,
+				"y": 73.0
+			},
+			"parameters": {
+				"albedo_color": {
+					"a": 1.0,
+					"b": 0.97265625,
+					"g": 0.571934223175049,
+					"r": 0.022796630859375,
+					"type": "Color"
+				},
+				"ao": 1.0,
+				"depth_scale": 0.5,
+				"emission_energy": 1.0,
+				"flags_transparent": true,
+				"metallic": 0.5,
+				"normal": 1.0,
+				"roughness": 0.1,
+				"size": 11,
+				"sss": 1.0
+			},
+			"seed_int": 0,
+			"type": "material"
+		},
+		{
+			"name": "wavelet_noise2",
+			"node_position": {
+				"x": -132.5,
+				"y": 59.5
+			},
+			"parameters": {
+				"frequency": 3.0,
+				"iterations": 1.0,
+				"offset": 0.0,
+				"persistence": 0.56,
+				"scale_x": 23.0,
+				"scale_y": 2.0,
+				"type": 1
+			},
+			"seed_int": 169917496,
+			"type": "wavelet_noise2"
+		},
+		{
+			"name": "math",
+			"node_position": {
+				"x": 82.5,
+				"y": 105.5
+			},
+			"parameters": {
+				"clamp": false,
+				"default_in1": 0.58,
+				"default_in2": 0.56,
+				"op": 0
+			},
+			"seed_int": 0,
+			"type": "math"
+		},
+		{
+			"name": "fbm3",
+			"node_position": {
+				"x": -183.5,
+				"y": 307.5
+			},
+			"parameters": {
+				"folds": 1.0,
+				"iterations": 5.0,
+				"noise": 0.0,
+				"offset": 0.0,
+				"persistence": 0.61,
+				"scale_x": 21.0,
+				"scale_y": 3.0
+			},
+			"seed_int": 0,
+			"type": "fbm3"
+		}
+	],
+	"parameters": {
+
+	},
+	"seed_int": 0,
+	"shortdesc": "",
+	"type": "graph"
+}
